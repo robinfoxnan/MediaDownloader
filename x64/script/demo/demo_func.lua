@@ -1,13 +1,13 @@
-author = "Robin-Fox"
+author = "Robin"
 version = 1.0
 
 setting = {
-    name = "演示函数使用",
+    name = "示范传递界面数据",
     dir = "d:\\",
-	desc = "根据关键字搜索歌曲，搜索时可以模拟网页设置分页，选择浏览第几页",
+	desc = "演示返回界面数据的函数notifyData使用方法",
 	input1 = "搜索词",
 	input2 = "页号",
-	input2 = "条数/页",
+	input3 = "条数/页",
 }
 
 

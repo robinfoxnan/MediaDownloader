@@ -1,10 +1,10 @@
-author = "Robin-Fox"
+author = "Robin"
 version = 1.0
 
 setting = {
     name = "json方法演示脚本",
     dir = "d:\\",
-	desc = "根据关键字搜索歌曲，搜索时可以模拟网页设置分页，选择浏览第几页",
+	desc = "演示内置的JSON编解码功能",
 	input1 = "搜索词",
 	input2 = "页号",
 	input3 = "条数/页",

@@ -2,8 +2,8 @@ author = "范例"
 version = 1.0
 
 setting = {
-    name = "酷我音乐下载脚本",
-    dir = "d:\\",
+    name = "酷我音乐搜索",
+    dir = "d:\\MP3",
 	desc = "根据关键字搜索歌曲，搜索时可以模拟网页设置分页，选择浏览第几页",
 	input1 = "搜索词",
 	input2 = "页号",
@@ -73,7 +73,10 @@ function lua_main(keyWord, pageIndex, pageSize)
         album_name = item:get('album'):toString()
         rid = item:get('rid'):toInt()
         music_info_url = "http://www.kuwo.cn/api/v1/www/music/playUrl?mid=".. rid .. "&type=convert_url3"
-        
+		album_pic = item:get("pic"):toString()
+        song_len = item:get("songTimeMinutes"):toString()
+		
+		
         --song_name = string.gsub(song_name, "&nbsp;", " ")
         singer = string.gsub(singer, "&nbsp;", " ")
         album_name = string.gsub(album_name, "&nbsp;", " ")
@@ -81,7 +84,17 @@ function lua_main(keyWord, pageIndex, pageSize)
 
         music_url = getInfo(music_info_url)
         printMessage(singer .. " | " .. song_name .. " | " .. album_name  .. " | ".. music_url)
-        downloadMp3(music_url, singer, song_name)
+        --downloadMp3(music_url, singer, song_name)
+		local tbl = {
+			singer = singer,
+			song = song_name,
+			album = album_name,
+			tags = rid,
+			size = song_len,
+			url = music_url,
+		}
+		-- 当解析到某个音乐条目的时候，可以使用此函数通知界面
+		notifyData(1, tbl)
     end
 
     return count
