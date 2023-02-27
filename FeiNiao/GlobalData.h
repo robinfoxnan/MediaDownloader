@@ -3,8 +3,20 @@
 #include "CRightView.h"
 #include "CPageEditor.h"
 
-#define  MSG_SCRIPT_CHANGE 1
-#define  MSG_
+class MusicItem 
+{
+public:
+	int index;   // ÐÐºÅ
+	string singer;
+	string song;
+	string downloadName;
+	string url;
+	int percent;
+};
+
+using MusicItemPtr = std::shared_ptr<MusicItem>;
+using MusicVector = std::vector<MusicItemPtr>;
+
 class GlobalData
 {
 public:
@@ -19,7 +31,12 @@ public:
 	string& getScriptContent();
 	
 	void tryLoadInfo();
-	void exeScript();
+	
+	void startThread();
+	void stopThread();
+	void onStopThread();
+	void setSearchkeys(std::vector<string> & other);
+	void setMusicVec(MusicVector & other);
 
 public: 
 	static GlobalData& instance()
@@ -28,6 +45,7 @@ public:
 		return data;
 	}
 
+	static void exeScript(GlobalData* lpData);
 	static void printMessage(const string& content);
 	static void onNotifyData(int dataType, const std::map<string, string>& data);
 	
@@ -51,5 +69,9 @@ private:
 	std::map<string, string> fileMap;
 	string curSelected;
 	string scriptContent;
+
+	std::shared_ptr<std::thread> workerThread;
+	std::vector<string> searchKeys;
+	MusicVector musicVec;
 };
 

@@ -245,7 +245,7 @@ int LuaPlugin::dowork(const string& filePath, std::vector<string> &args)
 		printFunc(err );
 	}
 
-
+	//luaL_unref(L, LUA_REGISTRYINDEX, luaMain); // 清理LuaBridge的引用
 	return 0;
 }
 
@@ -295,13 +295,45 @@ Json bird2fish::parseJsonFile(const string& filePath)
 	return doc;
 }
 
+void bird2fish::renameOsFile(lua_State* L)
+{
+	// set nil to them
+	lua_pushnil(L);
+	lua_setglobal(L, "os");
+
+	lua_pushnil(L);
+	lua_setglobal(L, "file");
+
+	lua_pushnil(L);
+	lua_setglobal(L, "io");
+
+	// rename them
+	/*lua_pushcfunction(L, luaopen_os);
+	lua_pushstring(L, "os_disabled");
+	lua_call(L, 1, 0);
+
+	lua_pushcfunction(L, luaopen_io);
+	lua_pushstring(L, "file_disabled");
+	lua_call(L, 1, 0);*/
+
+}
 
 bool LuaPlugin::registerGlobal(lua_State* L)
 {
+	renameOsFile(L);
+
 	// 版本信息
 	getGlobalNamespace(L).addFunction("engine_name",    getEngineName);
 	getGlobalNamespace(L).addFunction("engine_version", getEngineVersion);
 	// 注册打印信息函数
+
+	auto handlePrintFunc = std::function<void(luabridge::LuaRef)>(
+		[&](luabridge::LuaRef param) {
+			this->myPrint(param);
+		});
+
+	getGlobalNamespace(L).addFunction("print", handlePrintFunc);
+
 	if (printFunc)
 		getGlobalNamespace(L).addFunction("printMessage", printFunc);
 
@@ -483,12 +515,18 @@ string LuaPlugin::getScriptInfo(bird2fish::SCRIPT_INFO index)
 	{
 	case SCRIPT_DESC:
 		
-		ss << "author:" << author << "\r\n";
-		ss << "version:" << version << "\r\n";
-		ss << "name:" << name << "\r\n";
-		ss << "desc:" << desc << "\r\n";
+		
+		ss << "脚本说明：" << desc << "\r\n";
 		
 		return ss.str();
+	case SCRIPT_AUTHOR:
+
+		ss << "名称：" << name << ", ";
+		ss << "作者：" << author << "，";
+		ss << "版本号：" << version ;
+		
+		return ss.str();
+
 
 	case SCRIPT_INPUT1:
 		return input1;
@@ -503,6 +541,74 @@ string LuaPlugin::getScriptInfo(bird2fish::SCRIPT_INFO index)
 		break;
 	}
 	return "";
+}
+
+
+void LuaPlugin::myPrint(luabridge::LuaRef param)
+{
+	if (this->printFunc == nullptr)
+		return;
+
+	if (param.isNumber()) {
+		
+		int t = param.cast<double>();
+		this->printFunc(std::to_string(t));
+		return;
+	}
+	else if (param.isString())
+	{
+		this->printFunc(param.cast<string>());
+		return;
+	}
+	else if (param.isString())
+	{
+		bool b = param.cast<bool>();
+		this->printFunc(std::to_string(b));
+	}
+	else if (param.isNil())
+	{
+		this->printFunc("Nil");
+	}
+	else if (param.isTable())
+	{
+		lua_State* L = param.state();
+		std::vector<string> keys;
+		// 确保值是一个 table
+		if (lua_istable(L, -1))
+		{
+			lua_pushnil(L);
+			while (lua_next(L, -2) != 0)
+			{
+				// 如果键是字符串，则打印键名
+				if (lua_type(L, -2) == LUA_TSTRING)
+				{
+					const char* key = lua_tostring(L, -2);
+					//std::cout << "Key: " << key << std::endl;
+					keys.emplace_back(key);
+				}
+				lua_pop(L, 1);
+			}
+		}
+		else
+		{
+			throw std::runtime_error("print() can't translate this object type");
+			return;
+		}
+
+		stringstream ss;
+		for (auto& key : keys) {
+			// 使用LuaRef的成员函数来访问table中指定键的值
+			LuaRef value = param[key];
+			// 输出键值对
+			ss << key << " : " << value.cast<string>() << endl;
+			//data[key] = value.cast<string>();
+		}
+		printFunc(ss.str());
+	}
+	else
+	{
+		throw std::runtime_error("print() can't translate this object type");
+	}
 }
 
 void LuaPlugin::handleTable(luabridge::LuaRef myInt, luabridge::LuaRef table)

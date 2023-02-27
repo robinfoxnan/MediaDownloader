@@ -13,6 +13,9 @@
 #include <string_view>
 #include <map>
 #include <vector>
+#include <thread>
+#include <memory>
+#include <mutex>
 
 using namespace std;
 
@@ -56,5 +59,11 @@ using namespace std;
 #define IDS_STYLE_INDICATOR             61449
 #define ID_INDICATOR_FOLD               61450
 #define IDS_FOLD_INDICATOR              61451
+
+#define WM_NOTINY_USER_DATA WM_USER + 101
+#define MSG_SCRIPT_CHANGE   WM_USER + 102
+#define MSG_SCRITP_START    WM_USER + 103
+#define MSG_SCRITP_STOP     WM_USER + 104
+
 
 #endif //PCH_H

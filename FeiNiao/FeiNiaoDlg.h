@@ -15,7 +15,12 @@ public:
 
 // 对话框数据
 #ifdef AFX_DESIGN_TIME
-	enum { IDD = IDD_FEINIAO_DIALOG };
+	//enum { IDD = IDD_FEINIAO_DIALOG };
+	enum {
+		IDD = IDD_FEINIAO_DIALOG, 
+		IDR_MAIN_MENU = IDR_MENU_MAIN, 
+		IDR_TOOLBAR = IDR_TOOLBAR1
+};
 #endif
 
 	protected:
@@ -27,6 +32,7 @@ private:
 	bool bInited;
 	CLeftView* pLeft;
 	CRightView* pRight;
+	CToolBar  m_wndToolBar;
 
 
 // 实现

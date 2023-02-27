@@ -40,12 +40,17 @@ void CRightView::DoDataExchange(CDataExchange* pDX)
 	DDX_Text(pDX, IDC_EDIT1, mValue1);
 	DDX_Text(pDX, IDC_EDIT2, mValue2);
 	DDX_Text(pDX, IDC_EDIT3, mValue3);
+	DDX_Control(pDX, IDC_BUTTON1, mBtmExe);
+	DDX_Control(pDX, IDC_BUTTON2, mBtnDown);
+	DDX_Control(pDX, IDC_BUTTON3, mBtnClear);
 }
 
 BEGIN_MESSAGE_MAP(CRightView, CFormView)
 	ON_WM_SIZE()
 	ON_EN_MAXTEXT(IDC_EDIT_INFO, &CRightView::OnEnMaxtextEditInfo)
 	ON_BN_CLICKED(IDC_BUTTON1, &CRightView::OnClickExe)
+	ON_BN_CLICKED(IDC_BUTTON2, &CRightView::OnStartDownLoad)
+	ON_BN_CLICKED(IDC_BUTTON3, &CRightView::onClearList)
 END_MESSAGE_MAP()
 
 
@@ -95,7 +100,7 @@ void CRightView::OnInitialUpdate()
 	GlobalData::pPageVideo = &mPageVideo;
 	GlobalData::pPageLog = &mPageLog;
 
-	mValue1 = _T("程响");
+	mValue1 = _T("歌手歌名");
 	mValue2 = _T("1");
 	mValue3 = _T("30");
 	UpdateData(FALSE);
@@ -176,7 +181,9 @@ void CRightView::OnEnMaxtextEditInfo()
 
 void CRightView::OnClickExe()
 {
-	GlobalData::instance().exeScript();
+	auto args = getArgs();
+	GlobalData::instance().setSearchkeys(args);
+	GlobalData::instance().startThread();
 }
 
 
@@ -188,4 +195,39 @@ std::vector<string> CRightView::getArgs()
 	args.push_back((LPCTSTR)mValue2);
 	args.push_back((LPCTSTR)mValue3);
 	return args;
+}
+
+void CRightView::onNotifyData(int dataType, const std::map<string, string>& data)
+{
+
+}
+
+void CRightView::onStart()
+{
+	mBtmExe.EnableWindow(FALSE);
+	mBtnClear.EnableWindow(FALSE);
+	mBtnDown.EnableWindow(FALSE);
+}
+
+void CRightView::onStop()
+{
+	mBtmExe.EnableWindow(TRUE);
+	mBtnClear.EnableWindow(TRUE);
+	mBtnDown.EnableWindow(TRUE);
+}
+
+void CRightView::OnStartDownLoad()
+{
+	mPageMusic.getSelectionMusics();
+
+	mBtmExe.EnableWindow(FALSE);
+	mBtnClear.EnableWindow(FALSE);
+	mBtnDown.EnableWindow(FALSE);
+
+}
+
+
+void CRightView::onClearList()
+{
+	mPageMusic.onNotifyData(-1, 0);
 }

@@ -140,7 +140,17 @@ public:
 			delete buf;
 	}*/
 	
-			/**
+static string getExt(const string& filepath)
+{
+	auto pos = filepath.rfind('.');
+	if (pos == filepath.npos)
+	{
+		return "";
+	}
+	return filepath.substr(pos);
+}
+
+		/**
 		* NAME: getAbsopath
 		* DESC: 获取程序的绝对路径
 		* REMK: Absopath - Absolute path

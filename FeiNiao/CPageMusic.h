@@ -27,6 +27,9 @@ public:
 	bool bInited;
 	virtual BOOL OnInitDialog();
 	afx_msg void OnSize(UINT nType, int cx, int cy);
+	void onNotifyData(int dataType, const std::map<string, string>* data);
+	void getSelectionMusics();
 
 	
+	virtual LRESULT WindowProc(UINT message, WPARAM wParam, LPARAM lParam);
 };

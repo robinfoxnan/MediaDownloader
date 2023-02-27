@@ -108,7 +108,32 @@ BOOL CFeiNiaoDlg::OnInitDialog()
 	//  执行此操作
 	SetIcon(m_hIcon, TRUE);			// 设置大图标
 	SetIcon(m_hIcon, FALSE);		// 设置小图标
+	// 加载菜单
+	CMenu* pMenu = this->GetMenu();
+	if (pMenu != nullptr)
+	{
+		// 显示菜单
+		//::SetMenu(this->GetSafeHwnd(), pMenu->GetSafeHmenu());
+	}
 
+	// 创建工具条
+	if (m_wndToolBar.CreateEx(this, TBSTYLE_FLAT | TB_AUTOSIZE,
+		 WS_CHILD | WS_VISIBLE | CBRS_TOP | CBRS_GRIPPER
+		| CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_SIZE_DYNAMIC) ||
+		!m_wndToolBar.LoadToolBar(IDR_TOOLBAR1))
+	{
+		// 调整布局
+	/*CRect rcClient;
+	GetClientRect(rcClient);
+	m_wndToolBar.SetWindowPos(nullptr,
+		rcClient.left,
+		rcClient.top,
+		rcClient.Width(),
+		24,
+		SWP_NOACTIVATE | SWP_NOZORDER);*/
+	}
+
+	
 	
 
 	// TODO: 在此添加额外的初始化代码

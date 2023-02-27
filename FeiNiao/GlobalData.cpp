@@ -32,6 +32,22 @@ void GlobalData::onNotifyData(int dataType, const std::map<string, string>& data
 		stringstream ss;
 		ss << it.first << " : " << it.second;
 		printMessage(ss.str());
+
+	}
+	switch (dataType)
+	{
+	case 0:
+	case 1:
+	case 2:
+		if (pPageMusic)
+		{
+			pPageMusic->SendMessage(WM_NOTINY_USER_DATA, dataType, (LPARAM)(void *)&data);
+			//pPageMusic->onNotifyData(dataType, data);
+		}
+	
+
+	default:
+		break;
 	}
 }
 
@@ -39,11 +55,12 @@ void GlobalData::onNotifyData(int dataType, const std::map<string, string>& data
 GlobalData::GlobalData()
 {
 	curSelected = "";
+	workerThread = nullptr;
 }
 
 GlobalData::~GlobalData()
 {
-
+	stopThread();
 
 }
 std::map<string, string>& GlobalData::getScripts()
@@ -51,10 +68,8 @@ std::map<string, string>& GlobalData::getScripts()
 	return this->fileMap;
 }
 
-void EnumerateFiles(string csPath, std::map<string, string>& strArray)
+void EnumerateFiles(string &pathMain, string csPath, std::map<string, string>& strArray)
 {
-
-		string csPrePath = csPath.c_str();
 		string csNextPath = csPath.c_str();
 		CFileFind ff;
 		if (csPath.at(csPath.length() - 1) == '\\')
@@ -77,9 +92,9 @@ void EnumerateFiles(string csPath, std::map<string, string>& strArray)
 			if (ff.IsDirectory() && !ff.IsDots())
 			{
 				//cout << (LPCTSTR)ff.GetFilePath() << endl;
-				csNextPath += ff.GetFileName();
-				csNextPath += _T("\\");
-				EnumerateFiles(csNextPath, strArray);
+				string temp = csNextPath + "\\";
+				temp += ff.GetFileName();
+				EnumerateFiles(pathMain, temp, strArray);
 			}
 			else if (ff.IsDirectory())
 			{
@@ -87,9 +102,13 @@ void EnumerateFiles(string csPath, std::map<string, string>& strArray)
 			}
 			else
 			{
-				strArray[fileName] = (LPCTSTR)ff.GetFilePath();
+				string curPath = (LPCTSTR)ff.GetFilePath();
+				string curName = curPath.substr(pathMain.length()+1);
+
+				//strArray[fileName] = curPath;
+				strArray[curName] = curPath;
 			}
-			csNextPath = csPrePath;
+			
 		}
 	
 }
@@ -99,19 +118,20 @@ int GlobalData::loadScripts()
 	this->fileMap.clear();
 	string dir = PathUtil::getAppPath();
 
+	string scriptDir;
 	// ./bin/script
-	string scriptDir = PathUtil::combinePath(dir.c_str(), "script");
-	EnumerateFiles(scriptDir, this->fileMap);
+	scriptDir = PathUtil::combinePath(dir.c_str(), "script");
+	EnumerateFiles(scriptDir, scriptDir, this->fileMap);
 
 	// ./bin/../script
 	scriptDir = PathUtil::combinePath(dir.c_str(), "../script");
-	EnumerateFiles(scriptDir, this->fileMap);
+	EnumerateFiles(scriptDir, scriptDir, this->fileMap);
 
-	// {currentDir}/script
+	//// {currentDir}/script
 	char buffer[1024];
 	::GetCurrentDirectory(1024, buffer);
 	scriptDir = PathUtil::combinePath(buffer, "script");
-	EnumerateFiles(scriptDir, this->fileMap);
+	EnumerateFiles(scriptDir, scriptDir, this->fileMap);
 
 	stringstream ss;
 	ss << "load " << (int)this->fileMap.size() << " scripts files.";
@@ -123,11 +143,8 @@ int GlobalData::loadScripts()
 void GlobalData::setScriptSel(const string& name)
 {
 	this->curSelected = name;
-	stringstream ss;
-	ss << "current selected file" << name;
-	printMessage(ss.str());
-
 }
+
 void GlobalData::getScriptSel(string& fileName, string& filePath)
 {
 	auto it = this->fileMap.find(this->curSelected);
@@ -211,23 +228,29 @@ void GlobalData::tryLoadInfo()
 	pRightView->setInfo(1, lua.getScriptInfo(SCRIPT_INPUT1));
 	pRightView->setInfo(2, lua.getScriptInfo(SCRIPT_INPUT2));
 	pRightView->setInfo(3, lua.getScriptInfo(SCRIPT_INPUT3));
+
+	stringstream ss;
+	ss << "Ñ¡Ôñ½Å±¾¡¾" << lua.getScriptInfo(SCRIPT_AUTHOR) << "¡¿";
+	printMessage(ss.str());
 	
 }
 
-void GlobalData::exeScript()
+void GlobalData::exeScript(GlobalData* lpData)
 {
 	if (GlobalData::pRightView == nullptr)
 		return;
 
 	string fileName;
 	string filePath;
-	getScriptSel(fileName, filePath);
+	lpData->getScriptSel(fileName, filePath);
 	if (fileName == "")
 	{
 		printMessage("please select one script first");
 		return;
 	}
 	LuaPlugin lua;
+
+	pRightView->onStart();
 	
 	// don't forget to set this function, or will nothing output
 	lua.setcallbackFunc(GlobalData::printMessage, GlobalData::onNotifyData);
@@ -235,7 +258,45 @@ void GlobalData::exeScript()
 	lua.create();
 
 	printMessage("begin to execute script ");
-	std::vector<string> args = pRightView->getArgs();
+	std::vector<string> args;// = pRightView->getArgs();
 	lua.dowork(filePath, args);
 	printMessage("finish ");
+	lpData->onStopThread();
+
+}
+
+void GlobalData::onStopThread()
+{
+	if (pRightView)
+		pRightView->onStop();
+
+}
+void GlobalData::startThread()
+{
+	stopThread();
+	this->workerThread = std::make_shared<std::thread>(GlobalData::exeScript, this);
+
+}
+
+void GlobalData::stopThread()
+{
+	if (this->workerThread)
+	{
+		if (workerThread->joinable())
+		{
+			workerThread->join();
+
+		}
+		workerThread = nullptr;
+	}
+}
+
+void GlobalData::setSearchkeys(std::vector<string>& other)
+{
+	this->searchKeys = other;
+}
+
+void GlobalData::setMusicVec(MusicVector& other)
+{
+	this->musicVec = other;
 }

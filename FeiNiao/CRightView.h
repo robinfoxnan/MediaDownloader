@@ -54,6 +54,9 @@ public:
 	void showMsg(const string& str);
 	void clearMsg();
 	std::vector<string> getArgs();
+	void onNotifyData(int dataType, const std::map<string, string>& data);
+	void onStart();
+	void onStop();
 
 public:
 	afx_msg void OnSize(UINT nType, int cx, int cy);
@@ -64,6 +67,11 @@ public:
 	CString mValue1;
 	CString mValue2;
 	CString mValue3;
+	CButton mBtmExe;
+	afx_msg void OnStartDownLoad();
+	afx_msg void onClearList();
+	CButton mBtnDown;
+	CButton mBtnClear;
 };
 
 

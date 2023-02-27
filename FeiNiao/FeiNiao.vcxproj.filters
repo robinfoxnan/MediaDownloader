@@ -66,6 +66,12 @@
     <ClInclude Include="include\LuaPlugin.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="include\StringUtils.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="include\PathUtil.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="FeiNiao.cpp">
@@ -132,6 +138,9 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="res\FeiNiao.ico">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\toolbar1.bmp">
       <Filter>资源文件</Filter>
     </Image>
   </ItemGroup>

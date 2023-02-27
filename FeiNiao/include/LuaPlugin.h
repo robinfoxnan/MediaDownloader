@@ -30,6 +30,7 @@ namespace bird2fish
 		SCRIPT_INPUT1 = 1,
 		SCRIPT_INPUT2 = 2,
 		SCRIPT_INPUT3 = 3,
+		SCRIPT_AUTHOR = 4
 	};
 
 	// typedef functions
@@ -40,6 +41,7 @@ namespace bird2fish
 	void printMessage(const std::string& s);
 	double getEngineVersion();
 	string getEngineName();
+	void renameOsFile(lua_State* L);
 	
 
 	// 这是C++展出lua的一个缺点，即C++无法导出其重载函数
@@ -130,6 +132,7 @@ namespace bird2fish
 		void loadInfo();
 		string getScriptInfo(SCRIPT_INFO index);
 		void handleTable(luabridge::LuaRef myInt, luabridge::LuaRef table);
+		void myPrint(luabridge::LuaRef param);
 
 		void setcallbackFunc(PrintMsgFunc p, NotifyDataFunc  n)
 		{
@@ -145,6 +148,9 @@ namespace bird2fish
 
 			this->L = luaL_newstate();
 			luaL_openlibs(L);
+			//luaL_Reg
+		
+			//luaL_requiref(L, "md5", "luaopen_md5_core", 1);
 
 			// 先注册自己提供的接口函数
 			registerGlobal(L);	
