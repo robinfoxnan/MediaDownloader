@@ -10,8 +10,6 @@
 #include <unistd.h>
 #endif
 
-#include "PathUtil.h"
-
 using namespace std;
 
 namespace bird2fish

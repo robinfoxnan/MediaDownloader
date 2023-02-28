@@ -8,6 +8,7 @@
 #include "FeiNiaoDlg.h"
 #include "afxdialogex.h"
 #include "GlobalData.h"
+#include "CSettingDialog.h"
 
 
 #ifdef _DEBUG
@@ -75,6 +76,8 @@ BEGIN_MESSAGE_MAP(CFeiNiaoDlg, CDialogEx)
 	ON_WM_QUERYDRAGICON()
 	ON_WM_CREATE()
 	ON_WM_SIZE()
+	ON_COMMAND(ID_FILE_SETTING, &CFeiNiaoDlg::OnFileSetting)
+	ON_COMMAND(ID_FILE_SAVESCRIPT, &CFeiNiaoDlg::OnFileSavescript)
 END_MESSAGE_MAP()
 
 
@@ -265,3 +268,17 @@ void CFeiNiaoDlg::OnSize(UINT nType, int cx, int cy)
 }
 
 
+
+
+void CFeiNiaoDlg::OnFileSetting()
+{
+	CSettingDialog dialog;
+	dialog.DoModal();
+}
+
+
+void CFeiNiaoDlg::OnFileSavescript()
+{
+	
+	GlobalData::instance().NotifyMessage(MSG_SCRIPT_SAVE);
+}

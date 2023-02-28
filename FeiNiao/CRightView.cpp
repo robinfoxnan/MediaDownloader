@@ -17,9 +17,7 @@ CRightView::CRightView()
 	, mInput2(_T("页码"))
 	, mInput3(_T("条目"))
 	, mScriptDesc(_T("使用方法"))
-	, mValue1(_T(""))
-	, mValue2(_T(""))
-	, mValue3(_T(""))
+
 {
 	bInited = false;
 }
@@ -37,9 +35,9 @@ void CRightView::DoDataExchange(CDataExchange* pDX)
 	DDX_Text(pDX, IDC_STATIC_IN3, mInput3);
 	DDX_Text(pDX, IDC_STATIC_DESC, mScriptDesc);
 	DDX_Control(pDX, IDC_EDIT_INFO, mInfo);
-	DDX_Text(pDX, IDC_EDIT1, mValue1);
-	DDX_Text(pDX, IDC_EDIT2, mValue2);
-	DDX_Text(pDX, IDC_EDIT3, mValue3);
+	DDX_Control(pDX, IDC_EDIT1, mValueEdit1);
+	DDX_Control(pDX, IDC_EDIT2, mValueEdit2);
+	DDX_Control(pDX, IDC_EDIT3, mValueEdit3);
 	DDX_Control(pDX, IDC_BUTTON1, mBtmExe);
 	DDX_Control(pDX, IDC_BUTTON2, mBtnDown);
 	DDX_Control(pDX, IDC_BUTTON3, mBtnClear);
@@ -100,10 +98,10 @@ void CRightView::OnInitialUpdate()
 	GlobalData::pPageVideo = &mPageVideo;
 	GlobalData::pPageLog = &mPageLog;
 
-	mValue1 = _T("歌手歌名");
-	mValue2 = _T("1");
-	mValue3 = _T("30");
-	UpdateData(FALSE);
+	mValueEdit1.SetWindowText(_T("歌手歌名"));
+	mValueEdit2.SetWindowText(__T("1"));
+	mValueEdit3.SetWindowText(__T("30"));
+
 
 	mInfo.SetWindowText("一切就绪\r\n");
 	showMsg("一切就绪");
@@ -190,10 +188,17 @@ void CRightView::OnClickExe()
 std::vector<string> CRightView::getArgs()
 {
 	std::vector<string> args;
-	UpdateData(TRUE);
-	args.push_back((LPCTSTR)mValue1);
-	args.push_back((LPCTSTR)mValue2);
-	args.push_back((LPCTSTR)mValue3);
+	
+	CString txt1;
+	CString txt2;
+	CString txt3;
+	mValueEdit1.GetWindowText(txt1);
+	mValueEdit2.GetWindowText(txt2);
+	mValueEdit3.GetWindowText(txt3);
+
+	args.push_back((LPCTSTR)txt1);
+	args.push_back((LPCTSTR)txt2);
+	args.push_back((LPCTSTR)txt3);
 	return args;
 }
 

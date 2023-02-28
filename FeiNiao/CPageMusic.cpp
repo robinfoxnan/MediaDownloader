@@ -69,14 +69,14 @@ BOOL CPageMusic::OnInitDialog()
 	for (int i = 0; i < 1; i++)
 	{
 
-		mList.InsertItem(i, "1");
+		/*mList.InsertItem(i, "1");
 
 		mList.SetItemText(i, 1, "程响");
 		mList.SetItemText(i, 2, "云底人间");
 		mList.SetItemText(i, 3, "云底人间");
 		mList.SetItemText(i, 4, "程响");
 		mList.SetItemText(i, 5, "3.5M");
-		mList.SetItemText(i, 6, "https://asfafaafaf");
+		mList.SetItemText(i, 6, "https://asfafaafaf");*/
 		
 	}
 	//mList.SetItemColor(RGB(255, 255, 255), RGB(0, 250, 0), 2, 1);

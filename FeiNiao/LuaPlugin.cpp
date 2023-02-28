@@ -6,6 +6,10 @@
 
 using namespace bird2fish;
 
+
+string LuaPlugin::localDir = "d:\\mp3";
+
+
 void bird2fish::printMessage(const std::string& s)
 {
 	std::cout << s << std::endl;
@@ -92,12 +96,35 @@ int HttpClient::getAsFile(const string& url, const HttpHeader& header, const str
 		return -1;
 	}
 
-	int code = agent.getTest(url, const_cast<HttpHeader&>(header).getItems());
+	int code = agent.getTest(url, const_cast<HttpHeader&>(header).getItems(), true);
 	
 	this->headers = HttpHeader(agent.getHeaderMap());
+
+	if (code == 0)
+	{
+		errCode = 0;
+		code = agent.getCode();
+		fileSize = agent.getLen();
+	}	
+	else
+	{
+		errCode = code;
+		code = -1;
+	}
+	
 	return code;
+
 }
 
+int64_t HttpClient::getFileSize()
+{
+	return this->fileSize;
+}
+int HttpClient::getErr()
+{
+	return errCode;
+
+}
 int HttpClient::dataType()
 {
 	return 0;
@@ -185,6 +212,9 @@ void LuaPlugin::loadInfo()
 		this->input1 = i1.cast<string>();
 		this->input2 = i2.cast<string>();
 		this->input3 = i3.cast<string>();
+
+		// 设置表的内容
+		t["dir"].rawset<const string&>(LuaPlugin::localDir);
 	}
 	catch (LuaException* ex)
 	{
@@ -196,8 +226,7 @@ void LuaPlugin::loadInfo()
 	}
 	
 
-	// 设置表的内容
-	//t["dir"].rawset<const string&>("d:\\nusic\\");
+	
 }
 
 int LuaPlugin::dowork(const string& filePath, std::vector<string> &args)
@@ -325,8 +354,8 @@ bool LuaPlugin::registerGlobal(lua_State* L)
 	// 版本信息
 	getGlobalNamespace(L).addFunction("engine_name",    getEngineName);
 	getGlobalNamespace(L).addFunction("engine_version", getEngineVersion);
-	// 注册打印信息函数
 
+	// 注册打印信息函数
 	auto handlePrintFunc = std::function<void(luabridge::LuaRef)>(
 		[&](luabridge::LuaRef param) {
 			this->myPrint(param);
@@ -344,6 +373,7 @@ bool LuaPlugin::registerGlobal(lua_State* L)
 
 	getGlobalNamespace(L).addFunction("notifyData", handleTableFunc);
 
+
 	// other bind method using bind
 	/*std::function<void(luabridge::LuaRef, luabridge::LuaRef)> handleTableFunc = 
 		std::bind(&LuaPlugin::handleTable, this, std::placeholders::_1, std::placeholders::_2);
@@ -358,7 +388,12 @@ bool LuaPlugin::registerGlobal(lua_State* L)
 
 	// 文件与字符串
 	getGlobalNamespace(L).addFunction("combinePath", PathUtil::combinePathWindows);
+	getGlobalNamespace(L).addFunction("mkDir", LuaPlugin::createDir);
+	getGlobalNamespace(L).addFunction("readFileAsString", FileUtil::readFileAsString);
+	getGlobalNamespace(L).addFunction("writeToFile", FileUtil::writeFile);
+	getGlobalNamespace(L).addFunction("fileExist", PathUtil::fileExist);
 	
+
 
 	// 结构体操作
 
@@ -388,12 +423,15 @@ bool LuaPlugin::registerGlobal(lua_State* L)
 		.beginClass<HttpClient>("HttpClient")
 		.addConstructor<void(*)(void)>()
 		.addFunction<int, const string&, const HttpHeader&>("doGet", &HttpClient::getAsString)
+		.addFunction("doGetToFile", &HttpClient::getAsFile)
 		
 		.addFunction<const string&>("getBodyAsString", &HttpClient::getBodyAsString)
 		.addFunction<string>("getBodyAsAnsiString", &HttpClient::getBodyAsAnsiString)
 		.addFunction<json11::Json>("getBodyAsJson", &HttpClient::getBodyAsJson)
 		
 		.addFunction("getHeader", &HttpClient::getHeader)
+		.addFunction("getSize", &HttpClient::getFileSize)
+		.addFunction("getErr", &HttpClient::getErr)
 		.endClass();
 
 
@@ -560,10 +598,13 @@ void LuaPlugin::myPrint(luabridge::LuaRef param)
 		this->printFunc(param.cast<string>());
 		return;
 	}
-	else if (param.isString())
+	else if (param.isBool())
 	{
 		bool b = param.cast<bool>();
-		this->printFunc(std::to_string(b));
+		if (b)
+			this->printFunc("True");
+		else
+			this->printFunc("False");
 	}
 	else if (param.isNil())
 	{
@@ -663,4 +704,15 @@ void LuaPlugin::handleTable(luabridge::LuaRef myInt, luabridge::LuaRef table)
 	}
 
 	return;
+}
+
+bool LuaPlugin::createDir(const string& filePath)
+{
+	if (!PathUtil::isPrefixWith(filePath, LuaPlugin::localDir))
+	{
+		return false;
+		//printFunc("所创建的目录是设置的子目录");
+	}
+
+	return PathUtil::createDir(filePath);
 }

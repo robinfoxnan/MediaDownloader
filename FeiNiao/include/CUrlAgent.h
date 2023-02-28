@@ -44,7 +44,7 @@ public:
 	CUrlAgent();
 	~CUrlAgent();
 	void Init();
-	int getTest(const string &url, std::map<string, string>& headers);
+	int getTest(const string &url, std::map<string, string>& headers, bool bSaveFile = false);
 	int postTest(const string &url, const string & data, std::map<string, string>& headers);
 
 	void appendBody(const char  *ptr, size_t size);
@@ -53,7 +53,7 @@ public:
 	bool setDownload(const string& path) 
 	{ 
 		
-		file.open(this->filePath, ios::out | ios::binary | ios::trunc);
+		file.open(path, ios::out | ios::binary | ios::trunc);
 	
 		if (!file)
 		{
@@ -61,8 +61,8 @@ public:
 		}
 		
 
-		fileMode = 1; 
-		this->filePath = path; 
+		this->fileMode = 1; 
+		this->filePath = path;
 		return true;
 
 	}

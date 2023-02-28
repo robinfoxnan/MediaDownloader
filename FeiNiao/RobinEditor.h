@@ -10,8 +10,8 @@ public:
 	//Notifications
 	//void OnStyleNeeded(_Inout_ NotificationData* pSCNotification);
 	void OnCharAdded(_Inout_ NotificationData* pSCNotification);
-	/*void OnSavePointReached(_Inout_ NotificationData* pSCNotification);
-	void OnSavePointLeft(_Inout_ NotificationData* pSCNotification);
+	void OnSavePointReached(_Inout_ NotificationData* pSCNotification);
+	/*void OnSavePointLeft(_Inout_ NotificationData* pSCNotification);
 	void OnModifyAttemptRO(_Inout_ NotificationData* pSCNotification);
 	void OnDoubleClick(_Inout_ NotificationData* pSCNotification);*/
 	void OnUpdateUI(_Inout_ NotificationData* pSCNotification);
@@ -41,10 +41,12 @@ public:
 	void OnChange();
 	void OnScintillaSetFocus();
 	void OnScintillaKillFocus();*/
+	//BOOL PreTranslateMessage(MSG* pMsg);
 
 	void SetAStyle(int style, COLORREF fore, COLORREF back = RGB(0xff, 0xff, 0xff), int size = -1, const char* face = nullptr);
 	void DefineMarker(int marker, Scintilla::MarkerSymbol markerType, COLORREF fore, COLORREF back);
-
+	string getSelection();
+	void   setPaste(const string& str);
 	virtual BOOL OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult);
 public:
 //	virtual BOOL Create(LPCTSTR lpszClassName, LPCTSTR lpszWindowName, DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID, CCreateContext* pContext = NULL);

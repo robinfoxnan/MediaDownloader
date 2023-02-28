@@ -31,12 +31,16 @@ public:
 	string& getScriptContent();
 	
 	void tryLoadInfo();
+	void loadConfig();
 	
 	void startThread();
 	void stopThread();
 	void onStopThread();
 	void setSearchkeys(std::vector<string> & other);
 	void setMusicVec(MusicVector & other);
+
+	string getDefaultDir();
+	void   setDefaultDir(const string& str);
 
 public: 
 	static GlobalData& instance()
@@ -69,6 +73,8 @@ private:
 	std::map<string, string> fileMap;
 	string curSelected;
 	string scriptContent;
+	string scriptPath;
+	string dirDefault;
 
 	std::shared_ptr<std::thread> workerThread;
 	std::vector<string> searchKeys;

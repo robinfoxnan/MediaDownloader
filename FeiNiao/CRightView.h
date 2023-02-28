@@ -62,11 +62,13 @@ public:
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	
 	CEdit mInfo;
+	CEdit  mValueEdit1;
+	CEdit  mValueEdit2;
+	CEdit  mValueEdit3;
+
 	afx_msg void OnEnMaxtextEditInfo();
 	afx_msg void OnClickExe();
-	CString mValue1;
-	CString mValue2;
-	CString mValue3;
+
 	CButton mBtmExe;
 	afx_msg void OnStartDownLoad();
 	afx_msg void onClearList();

@@ -7,10 +7,11 @@ setting = {
 	desc = "根据关键字搜索歌曲，搜索时可以模拟网页设置分页，选择浏览第几页",
 	input1 = "搜索词",
 	input2 = "页号",
-	input2 = "条数/页",
+	input3 = "条数/页",
 
 }
-
+  
+  
 
 function lua_main(keyWord, pageIndex, pageSize)
     printMessage("您正在使用演示脚本，示范如何使用内置功能")
@@ -20,8 +21,9 @@ function lua_main(keyWord, pageIndex, pageSize)
     printMessage("engine name is ".. engine_name())
     printMessage("engine version is ".. engine_version())
 	printMessage("now dir is:" .. setting.dir)
-
+ 
     key = urlEncodeAnsi('双笙')
+    key = urlEncodeAnsi(keyWord)
     local header = HttpHeader()
     header:setItem('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Safari/537.36')
     header:setItem("Cookie", "kw_token=CBQHDVFFOMD;kw_token=7URL5LI6H9X;")
@@ -84,7 +86,10 @@ function lua_main(keyWord, pageIndex, pageSize)
 
         music_url = getInfo(music_info_url)
         printMessage(singer .. " | " .. song_name .. " | " .. album_name  .. " | ".. music_url)
+        
         --downloadMp3(music_url, singer, song_name)
+        downloadMp3(music_url, keyWord, song_name)
+        
 		local tbl = {
 			singer = singer,
 			song = song_name,
@@ -108,9 +113,7 @@ function getInfo(music_info_url)
    -- header:setItem("Cookie", "kw_token=CBQHDVFFOMD;kw_token=7URL5LI6H9X;")
     
    -- header:setItem('csrf','CBQHDVFFOMD')
-    
     --header:setItem("Accept-Encoding", "gzip, deflate" )
-    
    -- header:setItem("Postman-Token", "60c800d3-6c22-4fa7-a8f2-45bf5c83161e")
     --header:setItem('Host','www.kuwo.cn')
    -- header:setItem('Pragma','no-cache')
@@ -137,7 +140,10 @@ function downloadMp3(music_url, singer, song)
     client1 = HttpClient()
 
     subDir = combinePath(setting.dir, singer)
+	
+	mkDir(subDir)
     fileName = subDir .. "\\"..  song .. ".mp3"
     printMessage(fileName)
-    --client1:doGetToFile(music_url, )
+    code = client1:doGetToFile(music_url,header, fileName)
+    print(code)
 end

@@ -4,6 +4,8 @@
 
 #include "./include/LuaPlugin.h"
 #include "./include/PathUtil.h"
+#include "./include/StringUtils.h"
+#include "./include/IniParser.h"
 
 using namespace bird2fish;
 
@@ -14,6 +16,7 @@ CPageMusic* GlobalData::pPageMusic = nullptr;
 CPageEditor* GlobalData::pPageEditor = nullptr;
 CPageVideo* GlobalData::pPageVideo = nullptr;
 CPageLog* GlobalData::pPageLog = nullptr;
+
 
 
 // interface for lua
@@ -44,6 +47,7 @@ void GlobalData::onNotifyData(int dataType, const std::map<string, string>& data
 			pPageMusic->SendMessage(WM_NOTINY_USER_DATA, dataType, (LPARAM)(void *)&data);
 			//pPageMusic->onNotifyData(dataType, data);
 		}
+		
 	
 
 	default:
@@ -56,6 +60,7 @@ GlobalData::GlobalData()
 {
 	curSelected = "";
 	workerThread = nullptr;
+	loadConfig();
 }
 
 GlobalData::~GlobalData()
@@ -163,9 +168,11 @@ void GlobalData::getScriptSel(string& fileName, string& filePath)
 void GlobalData::NotifyMessage(int msgCode)
 {
 	bool ret = false;
+
 	switch (msgCode)
 	{
 	case MSG_SCRIPT_CHANGE:
+
 		ret = loadScript();
 		if (ret == false)
 		{
@@ -178,10 +185,18 @@ void GlobalData::NotifyMessage(int msgCode)
 
 		if (GlobalData::pPageEditor)
 		{
-			GlobalData::pPageEditor->OnSetScript(getScriptContent());
+			GlobalData::pPageEditor->OnSetScript(scriptPath, getScriptContent());
 		}
 
+		LuaPlugin::localDir = dirDefault;
+
 		break;
+	case MSG_SCRIPT_SAVE:
+		
+			if (pPageEditor)
+			{
+				pPageEditor->OnSaveScript(scriptPath);
+			}
 
 	default:
 		break;
@@ -195,12 +210,11 @@ string& GlobalData::getScriptContent()
 bool GlobalData::loadScript()
 {
 	string fileName; 
-	string filePath;
-	getScriptSel(fileName, filePath);
+	getScriptSel(fileName, scriptPath);
 	if (fileName == "")
 		return false;
 
-	this->scriptContent = FileUtil::readFileAsString(filePath.c_str());
+	this->scriptContent = FileUtil::readFileAsString(scriptPath.c_str());
 
 	return true;
 }
@@ -257,10 +271,10 @@ void GlobalData::exeScript(GlobalData* lpData)
 
 	lua.create();
 
-	printMessage("begin to execute script ");
-	std::vector<string> args;// = pRightView->getArgs();
-	lua.dowork(filePath, args);
-	printMessage("finish ");
+	printMessage("开始执行脚本 ");
+
+	lua.dowork(filePath, lpData->searchKeys);
+	printMessage("脚本执行结束 ");
 	lpData->onStopThread();
 
 }
@@ -299,4 +313,37 @@ void GlobalData::setSearchkeys(std::vector<string>& other)
 void GlobalData::setMusicVec(MusicVector& other)
 {
 	this->musicVec = other;
+}
+
+void GlobalData::loadConfig()
+{
+	string curDir = PathUtil::getAppPath();
+	std::string path = PathUtil::combinePath(curDir.c_str(), "downloader.ini");
+
+	IniParser iniFile;
+	bool ret = iniFile.load(path);
+	string& error = iniFile.getErrorMsg();
+
+	if (error.length() > 0)
+		printf("loading cpp_agent err = %s \n", error.c_str());
+
+	// enable agent or not
+	dirDefault = iniFile.getValue("global", "dir");
+	 
+}
+
+string GlobalData::getDefaultDir()
+{
+	return dirDefault;
+}
+
+void GlobalData::setDefaultDir(const string & str)
+{
+	dirDefault = str;
+	LuaPlugin::localDir = dirDefault;
+
+	string curDir = PathUtil::getAppPath();
+	std::string path = PathUtil::combinePath(curDir.c_str(), "downloader.ini");
+
+	::WritePrivateProfileString("global", "dir", str.c_str(), path.c_str());
 }

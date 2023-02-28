@@ -192,10 +192,12 @@
     <ClInclude Include="CPageMusic.h" />
     <ClInclude Include="CPageVideo.h" />
     <ClInclude Include="CRightView.h" />
+    <ClInclude Include="CSettingDialog.h" />
     <ClInclude Include="FeiNiao.h" />
     <ClInclude Include="FeiNiaoDlg.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="GlobalData.h" />
+    <ClInclude Include="include\IniParser.h" />
     <ClInclude Include="include\LuaPlugin.h" />
     <ClInclude Include="include\PathUtil.h" />
     <ClInclude Include="include\StringUtils.h" />
@@ -213,10 +215,12 @@
     <ClCompile Include="CPageMusic.cpp" />
     <ClCompile Include="CPageVideo.cpp" />
     <ClCompile Include="CRightView.cpp" />
+    <ClCompile Include="CSettingDialog.cpp" />
     <ClCompile Include="CUrlAgent.cpp" />
     <ClCompile Include="FeiNiao.cpp" />
     <ClCompile Include="FeiNiaoDlg.cpp" />
     <ClCompile Include="GlobalData.cpp" />
+    <ClCompile Include="IniParser.cpp" />
     <ClCompile Include="Json11.cpp" />
     <ClCompile Include="LuaPlugin.cpp" />
     <ClCompile Include="pch.cpp">

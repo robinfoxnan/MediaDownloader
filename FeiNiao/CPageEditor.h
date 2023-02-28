@@ -28,11 +28,14 @@ private:
 	HINSTANCE m_hScintilla;
 	HINSTANCE m_hLexilla;
 	Lexilla::CreateLexerFn m_pCreateLexer;
+	string scriptPath;
 public:
-	void OnSetScript(const string& content);
+	void OnSetScript(const string& filePath, const string& content);
+	void OnSaveScript(const string& filePath);
 public:
 	RobinEditor* NewEditor(int nID, CRect rect, int nStyle);
 	virtual BOOL OnInitDialog();
 	virtual BOOL OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult);
 	afx_msg void OnSize(UINT nType, int cx, int cy);
+	virtual BOOL PreTranslateMessage(MSG* pMsg);
 };

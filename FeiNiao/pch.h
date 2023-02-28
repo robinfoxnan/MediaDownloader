@@ -64,6 +64,7 @@ using namespace std;
 #define MSG_SCRIPT_CHANGE   WM_USER + 102
 #define MSG_SCRITP_START    WM_USER + 103
 #define MSG_SCRITP_STOP     WM_USER + 104
+#define MSG_SCRIPT_SAVE     WM_USER + 105
 
 
 #endif //PCH_H

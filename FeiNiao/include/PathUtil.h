@@ -5,6 +5,7 @@
 #include <deque>
 
 #include <string.h>
+#include "StringUtils.h"
 
 using namespace std;
 
@@ -140,15 +141,77 @@ public:
 			delete buf;
 	}*/
 	
-static string getExt(const string& filepath)
-{
-	auto pos = filepath.rfind('.');
-	if (pos == filepath.npos)
+	static bool fileExist(const string& filePath)
 	{
-		return "";
+		CFileFind fFind;
+		bool b = fFind.FindFile(filePath.c_str());
+		return b;
 	}
-	return filepath.substr(pos);
-}
+
+
+	// windows
+	static bool createDir(const string & filePath)
+	{
+		if (filePath.length() < 3)
+			return false;
+
+		
+		if (filePath[1] != ':' || filePath[2] != '\\')
+			return false;
+
+		// "c:\\mp3\\ "
+
+		bool b = false;
+		for (size_t index = 3; index < filePath.length(); )
+		{
+			auto pos = filePath.find('\\', index);
+			if (pos == string::npos)
+			{
+				b = CreateDirectory(filePath.c_str(), NULL);
+				if (!b && GetLastError() != ERROR_ALREADY_EXISTS)
+				{
+					return false;
+				}
+				return true;
+			}
+			string temp = filePath.substr(0, pos);
+			bool b = CreateDirectory(temp.c_str(), NULL);
+			if (!b && GetLastError() != ERROR_ALREADY_EXISTS)
+			{
+			
+				return false;	
+			}
+			index = pos + 1;
+			
+		}
+
+		return true;
+		
+	}
+	static bool isPrefixWith(const string filePath, const string& pre)
+	{
+		if (pre.length() > filePath.length())
+			return false;
+
+		string sub = filePath.substr(0, pre.length());
+		string prelower = pre;
+		StringUtils::toLower(prelower);
+		StringUtils::toLower(sub);
+		if (sub == prelower)
+			return true;
+
+		return false;
+	}
+
+	static string getExt(const string& filepath)
+	{
+		auto pos = filepath.rfind('.');
+		if (pos == filepath.npos)
+		{
+			return "";
+		}
+		return filepath.substr(pos);
+	}
 
 		/**
 		* NAME: getAbsopath

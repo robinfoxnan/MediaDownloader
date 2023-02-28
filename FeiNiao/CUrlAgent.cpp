@@ -177,7 +177,7 @@ std::map<string, string> CUrlAgent::getHeaderMap()
 	return temp;
 }
 
-int CUrlAgent::getTest(const string &url, std::map<string, string>& headers)
+int CUrlAgent::getTest(const string &url, std::map<string, string>& headers, bool bSaveFile)
 {
 	if (curl == nullptr)
 		Init();
@@ -186,6 +186,8 @@ int CUrlAgent::getTest(const string &url, std::map<string, string>& headers)
 		return false;
 
 	reset();
+	if (bSaveFile)
+		fileMode = 1;
 
 	status = 0;
 	curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
@@ -202,12 +204,14 @@ int CUrlAgent::getTest(const string &url, std::map<string, string>& headers)
 		if (status == 0)
 		{
 			CURLcode ret = curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &status);
+			
+			//status = ret;
 		}
 	}
 	if (file)
 		file.close();
 
-	return -code;
+	return code;
 }
 
 int CUrlAgent::postTest(const string &url, const string & data, std::map<string, string>& headers)

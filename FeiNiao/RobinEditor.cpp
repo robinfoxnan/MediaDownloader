@@ -195,6 +195,9 @@ void RobinEditor::setup()
 	DefineMarker(static_cast<int>(Scintilla::MarkerOutline::FolderOpenMid), Scintilla::MarkerSymbol::Empty, RGB(0xff, 0xff, 0xff), RGB(0, 0, 0));
 	DefineMarker(static_cast<int>(Scintilla::MarkerOutline::FolderMidTail), Scintilla::MarkerSymbol::Empty, RGB(0xff, 0xff, 0xff), RGB(0, 0, 0));*/
 
+	
+	DefineMarker(static_cast<int>(Scintilla::MarkerOutline::HistoryModified), Scintilla::MarkerSymbol::Circle, RGB(0xff, 0xff, 0xff), RGB(0, 0, 0xFF));
+
 	DefineMarker(static_cast<int>(Scintilla::MarkerOutline::FolderOpen), Scintilla::MarkerSymbol::Pixmap, RGB(0xff, 0xff, 0xff), RGB(0, 0, 0xFF));
 	DefineMarker(static_cast<int>(Scintilla::MarkerOutline::Folder), Scintilla::MarkerSymbol::Pixmap, RGB(0xff, 0xff, 0xff), RGB(0, 0, 0));
 	DefineMarker(static_cast<int>(Scintilla::MarkerOutline::FolderSub), Scintilla::MarkerSymbol::VLine, RGB(0xff, 0xff, 0xff), RGB(0, 0, 0));	
@@ -203,6 +206,7 @@ void RobinEditor::setup()
 
 	DefineMarker(static_cast<int>(Scintilla::MarkerOutline::FolderOpenMid), Scintilla::MarkerSymbol::Pixmap, RGB(0xff, 0xff, 0xff), RGB(0, 0, 0));
 	DefineMarker(static_cast<int>(Scintilla::MarkerOutline::FolderMidTail), Scintilla::MarkerSymbol::LCornerCurve, RGB(0xff, 0xff, 0xff), RGB(0, 0, 0));  // mid end
+
 
 
 	MarkerDefinePixmap(static_cast<int>(Scintilla::MarkerOutline::Folder), (const char *)plus_xpm);
@@ -258,12 +262,12 @@ BOOL RobinEditor::OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult)
 			OnCharAdded(pSCNotification);
 			break;
 		}
-//		case Notification::SavePointReached:
-//		{
-//#pragma warning(suppress: 26486)
-//			OnSavePointReached(pSCNotification);
-//			break;
-//		}
+		case Notification::SavePointReached:
+		{
+#pragma warning(suppress: 26486)
+			OnSavePointReached(pSCNotification);
+			break;
+		}
 //		case Notification::SavePointLeft:
 //		{
 //#pragma warning(suppress: 26486)
@@ -442,6 +446,10 @@ BOOL RobinEditor::OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult)
 //	return CScintillaCtrl::OnNotify(wParam, lParam, pResult);
 }
 
+void RobinEditor::OnSavePointReached(_Inout_ NotificationData* pSCNotification)
+{
+
+}
 void RobinEditor::OnMarginClick(_Inout_ NotificationData* pSCNotification)
 {
 	//By default get the line where the click occurred and toggle its fold state
@@ -463,6 +471,12 @@ void RobinEditor::OnCharAdded(_Inout_ Scintilla::NotificationData* pSCNotificati
 
 	lstChar = pSCNotification->ch;
 	//std::string str = pSCNotification->text;
+
+	auto pos = GetCurrentPos();
+	auto line = LineFromPosition(pos);
+	//auto  lineLength = LineLength(line);
+
+	MarkerAdd(line, (int)Scintilla::MarkerOutline::HistoryModified);
 
 
 	//Get the previous 13 characters and if it is "scintilla is " case insensitive
@@ -543,6 +557,8 @@ void RobinEditor::OnUpdateUI(_Inout_ NotificationData* pSCNotification)
 	auto line = LineFromPosition(pos);
 	auto  lineLength = LineLength(line);
 
+	//MarkerAdd(line, (int)Scintilla::MarkerOutline::HistoryModified);
+
 	if (lstChar == '\r' || lstChar == '\n')
 	{
 		if (line > 0 && lineLength <= 2)
@@ -566,5 +582,17 @@ void RobinEditor::OnUpdateUI(_Inout_ NotificationData* pSCNotification)
 		}
 		lstChar = 0;
 	}// end \r\n
+}
+
+string RobinEditor::getSelection()
+{
+	CString str = GetSelText();
+	return (LPCTSTR)str;
+	
+}
+
+void   RobinEditor::setPaste(const string& str)
+{
+	ReplaceSel(str.c_str());
 }
 

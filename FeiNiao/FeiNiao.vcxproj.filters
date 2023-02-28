@@ -72,6 +72,12 @@
     <ClInclude Include="include\PathUtil.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="CSettingDialog.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="include\IniParser.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="FeiNiao.cpp">
@@ -123,6 +129,12 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="Json11.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="CSettingDialog.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="IniParser.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

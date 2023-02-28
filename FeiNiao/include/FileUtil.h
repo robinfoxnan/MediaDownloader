@@ -14,7 +14,7 @@ namespace bird2fish
 
 	class FileUtil {
 	public:
-		static void writeFile(const stringstream& body, const char* filePath)
+		static void writeFileSS(const stringstream& body, const char* filePath)
 		{
 			//string outFilePath = "temp.html";
 			std::ofstream fs(filePath, std::ios::out | std::ios::binary);
@@ -25,8 +25,12 @@ namespace bird2fish
 
 		static void writeFile(const string& str, const char* filePath) 
 		{
-			std::ofstream fs(filePath, std::ios::out | std::ios::binary);
-			fs << str;
+			std::ofstream fs(filePath, std::ios::out | std::ios::binary  | std::ios::trunc); //  
+			if (fs.is_open())
+			{
+				fs << str;
+				fs.close();
+			}
 		}
 
 		static string readFileAsString(const char * filePath)

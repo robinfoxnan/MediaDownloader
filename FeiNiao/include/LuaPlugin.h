@@ -42,6 +42,15 @@ namespace bird2fish
 	double getEngineVersion();
 	string getEngineName();
 	void renameOsFile(lua_State* L);
+
+	// JSON处理全局函数
+	Json intToJson(int i);
+	Json numToJson(double i);
+	Json stringToJson(const string& str);
+	Json objectToJson(json11::Json::object& obj);
+	Json parseJsonStr(const string& str);
+	Json parseJsonFile(const string& filePath);
+
 	
 
 	// 这是C++展出lua的一个缺点，即C++无法导出其重载函数
@@ -90,6 +99,8 @@ namespace bird2fish
 		int getAsFile(const string& url, const HttpHeader& header, const string& filePath);
 
 		HttpHeader& getHeader();
+		int getErr();
+		int64_t getFileSize();
 		int dataType();
 
 		const string& getBodyAsString();
@@ -100,17 +111,12 @@ namespace bird2fish
 		string host;
 		HttpHeader headers;
 		string body;
+		int errCode;
+		size_t fileSize;
 	};
 
 
-	// JSON处理全局函数
-	Json intToJson(int i);
-	Json numToJson(double i);
-	Json stringToJson(const string& str);
-	Json objectToJson(json11::Json::object &obj);
-	Json parseJsonStr(const string& str);
-	Json parseJsonFile(const string& filePath);
-
+	
 	class LuaPlugin {
 
 	public:
@@ -122,7 +128,7 @@ namespace bird2fish
 		{
 			close();
 		}
-
+		static string localDir;
 
 	public:
 		// 初始化全局各种接口函数
@@ -133,6 +139,9 @@ namespace bird2fish
 		string getScriptInfo(SCRIPT_INFO index);
 		void handleTable(luabridge::LuaRef myInt, luabridge::LuaRef table);
 		void myPrint(luabridge::LuaRef param);
+
+		static bool createDir(const string& filePath);
+		
 
 		void setcallbackFunc(PrintMsgFunc p, NotifyDataFunc  n)
 		{
@@ -166,6 +175,8 @@ namespace bird2fish
 		}
 
 		private:
+			
+
 			lua_State* L = nullptr;
 			
 			// lua script informations	

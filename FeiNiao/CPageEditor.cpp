@@ -5,8 +5,9 @@
 #include "FeiNiao.h"
 #include "CPageEditor.h"
 #include "afxdialogex.h"
+#include "./include/FileUtil.h"
 
-
+using namespace bird2fish;
 // CPageEditor 对话框
 
 IMPLEMENT_DYNAMIC(CPageEditor, CDialog)
@@ -112,10 +113,93 @@ void CPageEditor::OnSize(UINT nType, int cx, int cy)
 }
 
 
-void CPageEditor::OnSetScript(const string& content)
+void CPageEditor::OnSetScript(const string& filePath, const string& content)
 {
 	if (pEditor)
 	{
+		scriptPath = filePath;
 		pEditor->SetText(content.c_str());
 	}
 }
+
+void CPageEditor::OnSaveScript(const string& filePath)
+{
+	if (pEditor)
+	{
+		auto pos = pEditor->GetTextLength();
+		string content = pEditor->GetText(pos);
+		FileUtil::writeFile(content, filePath.c_str());
+	}
+}
+
+void OnCopy(const string& str)
+{
+	if (OpenClipboard(NULL))
+	{
+		EmptyClipboard();
+		size_t cbStr = (str.length() + 1) * sizeof(TCHAR);
+		HGLOBAL hData = GlobalAlloc(GMEM_MOVEABLE, cbStr);
+		memcpy_s(GlobalLock(hData), cbStr, str.c_str(), cbStr);
+		GlobalUnlock(hData);
+		SetClipboardData(CF_TEXT, hData);
+		CloseClipboard();
+	}
+}
+string onPaste()
+{
+	string str;
+	if (OpenClipboard(NULL))
+	{
+		// 获取剪贴板中的字符串数据
+		HANDLE hData = GetClipboardData(CF_TEXT);
+		if (hData != NULL)
+		{
+			LPCTSTR lpdata = (LPCTSTR)GlobalLock(hData);
+			str = lpdata;
+			GlobalUnlock(hData);
+		}
+		// 关闭剪贴板
+		CloseClipboard();
+	}
+	return str;
+}
+
+BOOL CPageEditor::PreTranslateMessage(MSG* pMsg)
+{
+	// TODO: 在此添加专用代码和/或调用基类
+	// 检查消息是否是键盘消息
+	if (pMsg->message == WM_KEYDOWN)
+	{
+		// 检查是否按下了Ctrl + S
+		if (GetKeyState(VK_CONTROL) & 0x8000)
+		{
+			if (pMsg->wParam == 'S')
+			{
+				auto pos = pEditor->GetTextLength();
+				string content = pEditor->GetText(pos);
+				FileUtil::writeFile(content, scriptPath.c_str());
+				pEditor->MarkerDeleteAll( (int)Scintilla::MarkerOutline::HistoryModified);
+			}
+			else if (pMsg->wParam == 'C')
+			{
+				string str = pEditor->getSelection();
+				OnCopy(str);
+			}
+			else if (pMsg->wParam == 'V')
+			{
+				string str = onPaste();
+				pEditor->setPaste(str);
+			}
+			return TRUE; // 表示消息已经处理过了
+		}
+	}
+	return CDialog::PreTranslateMessage(pMsg);
+}
+
+
+
+
+
+
+
+
