@@ -321,30 +321,134 @@ JsonArray表示一个Json数组队形，成员函数如下：
 
 限制：所有文件操作，为了保证安全，都要求限制在setting["dir"]路径下：
 
-| 函数        |      |      |                      |
-| ----------- | ---- | ---- | -------------------- |
-| combinePath |      |      | 拼接文件到当前路径， |
-|             |      |      | 创建目录             |
-|             |      |      | 读文件为字符串       |
-|             |      |      | 写字符串到文件       |
-|             |      |      |                      |
-|             |      |      |                      |
-|             |      |      |                      |
-|             |      |      |                      |
-|             |      |      |                      |
-|             |      |      |                      |
-|             |      |      |                      |
-|             |      |      |                      |
+| 函数             | 参数类型       | 返回类型 | 说明                 |
+| ---------------- | -------------- | -------- | -------------------- |
+| combinePath      | string, string | string   | 拼接文件到当前路径， |
+| mkDir            | string         | bool     | 创建目录             |
+| readFileAsString | string         | string   | 读文件为字符串       |
+| writeToFile      | string, string | bool     | 写字符串到文件       |
+| fileExist        | string         | bool     | 文件或者目录是否存在 |
+
+
+示例代码：
+
+```lua
+	printMessage("当前目录：" .. setting.dir)
+
+	singer = "周懂"
+    subDir = combinePath(setting.dir,  singer)
+	
+	b = mkDir(subDir)
+	if b then 
+		print("创建成功" .. subDir)
+	else 
+		print("创建失败" .. subDir)
+	end
+	
+	b = fileExist(subDir)
+	if b then 
+		print("存在" .. subDir)
+	else 
+		print("不存在" .. subDir)
+	end
+	
+	print(b)
+	song = "test"
+    fileName = subDir .. "\\"..  song .. ".txt"
+    printMessage("准备写文件" .. fileName)
+	
+    writeToFile("it is a test.", fileName)
+    
+    str = readFileAsString(fileName)
+    print(str)
+```
+
+
 
 ### 四、数据库操作
 
 #### 4.1 sqlite
 
-#### 4.2 excel
+#### 4.2 redis
 
 #### 4.2 mysql
 
 #### 4.3 Elastic Search
 
-### 约定
+
+
+### 五、约定
+
+#### 5.1 脚本编码
+
+脚本使用ansi编码，比如中国使用gbk或者gb2312编码，代码页936
+
+
+
+#### 5.2 交互信息
+
+所有的脚本必须提供如下的基础信息：
+
+```lua
+author = "Robin"
+version = 1.0
+
+setting = {
+    name = "字符集使用",
+    dir = "d:\\",
+	desc = "展示字符集转码",
+	input1 = "搜索词",
+	input2 = "页号",
+	input3 = "条数/页",
+}
+
+```
+
+解释如下：
+
+| 全局变量       | 含义                                                         |
+| -------------- | ------------------------------------------------------------ |
+| author         | 脚本作者                                                     |
+| version        | 脚本的版本号                                                 |
+| setting.name   | 脚本名称                                                     |
+| setting.dir    | 约定的默认工作目录，限制文件操作在此范围内；引擎会重置此项！！ |
+| setting.desc   | 描述脚本的使用方式等说明                                     |
+| setting.input1 | 第一个输入的名称                                             |
+| setting.input2 | 第二个输入的名称                                             |
+| setting.input3 | 第三个输入的名称                                             |
+
+#### 5.3 调用入口
+
+调用的入口函数名必须为lua_main，并且有三个字符串参数，返回一个整数类型；
+
+```lua
+function lua_main(keyWord, pageIndex, pageSize)
+
+return 0
+end
+
+```
+
+#### 5.4 流程
+
+用户在界面填写参数，通过脚本来执行数据解析，填写数据返回给界面展示，
+
+下载资源的过程可以在脚本中实现（需要设置复杂的header的时候），也可以在界面操作。
+
+返回的数据格式如下：
+
+```lua
+local tbl = {
+		singer = "程响",
+		song = "云底人间",
+		album = "某专辑",
+		tags = "云底",
+		size = "5.4M",
+		url = "HTTS://AFSDAFAAF",
+	}
+	-- 当解析到某个音乐条目的时候，可以使用此函数通知界面
+	notifyData(1, tbl)
+```
+
+返回的数据使用table方式，但是键值的固定的！
 
