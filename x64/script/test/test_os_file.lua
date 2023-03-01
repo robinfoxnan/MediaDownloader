@@ -14,7 +14,7 @@ setting = {
 function lua_main(keyWord, pageIndex, pageSize)
 	--printMessage 仅能接收字符串
 
-	-- 禁用了io，不再能随意访问文件
+	-- 禁用了io，不再能随意访问文件，请查看demo_file示例
 	-- 打开文件并读取内容
 	local f = io.open("d:\\TBuild\\test.txt", "r")
 	local content = f:read("*all")

@@ -2,9 +2,9 @@ author = "Robin"
 version = 1.0
 
 setting = {
-    name = "字符集使用",
+    name = "文件操作",
     dir = "d:\\",
-	desc = "展示字符集转码",
+	desc = "展示如何使用当前目录的设置拼接创建子目录，并写入和读取文件",
 	input1 = "搜索词",
 	input2 = "页号",
 	input3 = "条数/页",
