@@ -41,6 +41,7 @@ void CRightView::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_BUTTON1, mBtmExe);
 	DDX_Control(pDX, IDC_BUTTON2, mBtnDown);
 	DDX_Control(pDX, IDC_BUTTON3, mBtnClear);
+	DDX_Control(pDX, IDC_STATIC_PROGESS, mTxtProgress);
 }
 
 BEGIN_MESSAGE_MAP(CRightView, CFormView)
@@ -88,7 +89,7 @@ void CRightView::OnInitialUpdate()
 	mPageEditor.Create(IDD_EDITOR, &mTab);
 	mTab.InsertItem("  音乐搜索  ", &mPageMusic);
 	mTab.InsertItem("  视频搜索  ", &mPageVideo);
-	mTab.InsertItem("  下载记录  ", &mPageLog);
+	mTab.InsertItem("  API接口测试  ", &mPageLog);
 	mTab.InsertItem("  脚本编辑  ", &mPageEditor);
 
 	// 全局引用
@@ -121,7 +122,10 @@ void CRightView::OnSize(UINT nType, int cx, int cy)
 		CRect rectEdit(0, rt.Height() - 250,  rt.Width(), rt.Height());
 		mInfo.MoveWindow(&rectEdit);
 
-		CRect rectTab(0, 150, rt.Width(), rt.Height()-255);
+		CRect rtProgress(5, rt.Height() - 280, rt.Width(), rt.Height()-255);
+		mTxtProgress.MoveWindow(&rtProgress);
+
+		CRect rectTab(0, 150, rt.Width(), rt.Height()-285);
 		mTab.MoveWindow(&rectTab);
 	}
 	
@@ -181,7 +185,7 @@ void CRightView::OnClickExe()
 {
 	auto args = getArgs();
 	GlobalData::instance().setSearchkeys(args);
-	GlobalData::instance().startThread();
+	GlobalData::instance().startThread(0);
 }
 
 
@@ -202,9 +206,23 @@ std::vector<string> CRightView::getArgs()
 	return args;
 }
 
-void CRightView::onNotifyData(int dataType, const std::map<string, string>& data)
+void CRightView::onNotifyData(int dataType, const std::map<string, string>* data)
 {
+	
+	if (data ->size() < 3)
+		return;
+	std::stringstream ss;
+	ss << data->at("url") << "    [";
+	ss << data->at("bytes") << " / ";
+	ss << data->at("all") << "]";
 
+	mTxtProgress.SetWindowText(ss.str().c_str());
+
+	if (dataType >= 0)
+	{
+		
+		mPageMusic.onNotifyData(3, data);
+	}
 }
 
 void CRightView::onStart()
@@ -223,11 +241,18 @@ void CRightView::onStop()
 
 void CRightView::OnStartDownLoad()
 {
-	mPageMusic.getSelectionMusics();
+	size_t n = mPageMusic.getSelectionMusics();
+	if (n == 0)
+	{
+		AfxMessageBox("请先选择至少一个条目，右键全选或者全去");
+		return;
+	}
 
 	mBtmExe.EnableWindow(FALSE);
 	mBtnClear.EnableWindow(FALSE);
 	mBtnDown.EnableWindow(FALSE);
+
+	GlobalData::instance().startThread(1);
 
 }
 
@@ -235,4 +260,17 @@ void CRightView::OnStartDownLoad()
 void CRightView::onClearList()
 {
 	mPageMusic.onNotifyData(-1, 0);
+}
+
+
+LRESULT CRightView::WindowProc(UINT message, WPARAM wParam, LPARAM lParam)
+{
+	// TODO: 在此添加专用代码和/或调用基类
+	if (message == MSG_DOWNLOAD_PROGRESS)
+	{
+		std::map<string, string>* data = (std::map<string, string>  * )lParam;
+		this->onNotifyData((int)wParam, data);
+	}
+
+	return CFormView::WindowProc(message, wParam, lParam);
 }

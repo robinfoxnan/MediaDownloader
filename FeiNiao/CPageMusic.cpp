@@ -34,6 +34,9 @@ void CPageMusic::DoDataExchange(CDataExchange* pDX)
 
 BEGIN_MESSAGE_MAP(CPageMusic, CDialog)
 	ON_WM_SIZE()
+	ON_COMMAND(ID_SELECTION_SELECTALL, &CPageMusic::OnSelectionSelectall)
+	ON_COMMAND(ID_SELECTION_UNSELECTALL, &CPageMusic::OnSelectionUnselectall)
+	ON_NOTIFY(NM_RCLICK, IDC_LIST_MUSIC, &CPageMusic::OnNMRClickListMusic)
 END_MESSAGE_MAP()
 
 
@@ -61,6 +64,7 @@ BOOL CPageMusic::OnInitDialog()
 	mList.InsertColumn(4, "关键字", LVCFMT_CENTER, 200, 0);
 	mList.InsertColumn(5, "大小", LVCFMT_CENTER, 100, 0);
 	mList.InsertColumn(6, "链接", LVCFMT_CENTER, 500, 0);
+	mList.InsertColumn(7, "进度", LVCFMT_CENTER, 500, 0);
 	//mList.SetColumnWidth(6, LVSCW_AUTOSIZE_USEHEADER);
 
 
@@ -119,6 +123,9 @@ void CPageMusic::onNotifyData(int dataType, const std::map<string, string>* data
 	*/
 
 	int i = 0;
+	std::stringstream ss;
+	string bytes;
+	string all;
 	switch (dataType)
 	{
 	case -1:
@@ -137,6 +144,28 @@ void CPageMusic::onNotifyData(int dataType, const std::map<string, string>* data
 		mList.SetItemText(i, 6, data->at("url").c_str());
 
 		mList.Invalidate(TRUE);
+		break;
+
+	case 3:
+
+		i = std::atoi (  data->at("i").c_str());
+		
+		bytes = data->at("bytes");
+		all = data->at("all");
+		if (bytes == all)
+		{
+			mList.SetItemText(i, 7, "完成");
+		}
+		else
+		{
+			ss << bytes << " / ";
+			ss << all;
+			mList.SetItemText(i, 7, ss.str().c_str());
+		}
+		
+		
+
+		break;
 
 	default:
 		break;
@@ -154,18 +183,20 @@ LRESULT CPageMusic::WindowProc(UINT message, WPARAM wParam, LPARAM lParam)
 	return CDialog::WindowProc(message, wParam, lParam);
 }
 
-void CPageMusic::getSelectionMusics()
+size_t CPageMusic::getSelectionMusics()
 {
 	int n = mList.GetItemCount();
 	MusicVector vec;
 	for (int i = 0; i < n; i++)
 	{
 		bool b = mList.GetCheck(i);
+		if (!b)
+			continue;
 		MusicItemPtr item = std::make_shared<MusicItem>();
 		item->index = i;
 		item->percent = 0;
-		item->singer = mList.GetItemText(i, 0);
-		item->song = mList.GetItemText(i, 1);
+		item->singer = mList.GetItemText(i, 1);
+		item->song = mList.GetItemText(i, 2);
 		item->url = mList.GetItemText(i, 6);
 		item->downloadName = item->singer + "-";
 		item->downloadName += item->song;
@@ -174,4 +205,71 @@ void CPageMusic::getSelectionMusics()
 	}
 
 	GlobalData::instance().setMusicVec(vec);
+
+	return vec.size();
+}
+
+
+void CPageMusic::OnSelectionSelectall()
+{
+	// TODO: 在此添加命令处理程序代码
+	int n = mList.GetItemCount();
+	{
+		for (int i = 0; i < n; i++)
+		{
+			mList.SetCheck(i, TRUE);
+		}
+	}
+}
+
+
+void CPageMusic::OnSelectionUnselectall()
+{
+	int n = mList.GetItemCount();
+	{
+		for (int i = 0; i < n; i++)
+		{
+			mList.SetCheck(i, FALSE);
+		}
+	}
+}
+
+
+BOOL CPageMusic::OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult)
+{
+	// TODO: 在此添加专用代码和/或调用基类
+
+	return CDialog::OnNotify(wParam, lParam, pResult);
+}
+
+
+void CPageMusic::OnNMRClickListMusic(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	LPNMITEMACTIVATE pNMItemActivate = reinterpret_cast<LPNMITEMACTIVATE>(pNMHDR);
+	// TODO: 在此添加控件通知处理程序代码
+	
+
+	NM_LISTVIEW* pNMListView = (NM_LISTVIEW*)pNMHDR;
+	if (pNMListView->iItem != -1)
+	{
+		DWORD dwPos = GetMessagePos();
+		CPoint point(LOWORD(dwPos), HIWORD(dwPos));
+		CMenu menu;
+		//添加线程操作
+		VERIFY(menu.LoadMenu(IDR_MENU_MUSIC));	
+		CMenu* popup = menu.GetSubMenu(0);
+		ASSERT(popup != NULL);
+		popup->TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, point.x, point.y, this);
+
+		//下面的两行代码主要是为了后面的操作为准备的
+		//获取列表视图控件中第一个被选择项的位置  
+
+		//POSITION m_pstion = mList.GetFirstSelectedItemPosition();
+		//该函数获取由pos指定的列表项的索引，然后将pos设置为下一个位置的POSITION值
+		//m_nIndex = m_countList.GetNextSelectedItem(m_pstion);
+
+		//m_nIndex表示选取的行
+
+	}
+	*pResult = 0;
 }

@@ -50,4 +50,5 @@ public:
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg void OnFileSetting();
 	afx_msg void OnFileSavescript();
+	afx_msg void OnAbout();
 };

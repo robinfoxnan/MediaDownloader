@@ -265,7 +265,7 @@ int LuaPlugin::dowork(const string& filePath, std::vector<string> &args)
 		if (args.size() > 3) pageSize = args[2];
 		int result = luaMain(keyWords, pageNum, pageSize);
 		//std::cout << "search Result:" << result << std::endl;
-		printFunc("search Result:" + std::to_string(result));
+		printFunc("½Å±¾·µ»ØÖµ£º" + std::to_string(result));
 	}
 	catch (const luabridge::LuaException& e) {
 		//std::cerr << e.what() << std::endl;

@@ -14,25 +14,26 @@ setting = {
 function lua_main(keyWord, pageIndex, pageSize)
     printMessage("当前目录：" .. setting.dir)
 
-	url = 'https://other-web-ri01-sycdn.kuwo.cn/e4f0672a81e44a802cf67a51c7640849/63fd96a0/resource/n3/97/99/2560035031.mp3'
+	url = 'https://blog.csdn.net/boomworks/article/details/124521383'
+	print('准备下载：' .. url)
 	
 	local header = HttpHeader()
     header:setItem('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Safari/537.36')
 	
-	singer = 'test1'
+	singer = 'csdn'
 	song = "测试"
     client1 = HttpClient()
     subDir = combinePath(setting.dir, singer)
 	
 	mkDir(subDir)
-    fileName = subDir .. "\\"..  song .. ".mp3"
-    printMessage(fileName)
+    fileName = subDir .. "\\"..  song .. ".html"
+    printMessage('路径：' ..fileName)
     code = client1:doGetToFile(url, header, fileName)
-    print(code)
+    print('http 应答码' .. code)
 	size = client1:getSize()
-	print(size)
+	print('文件大小' .. size)
 	
-	print(client1:getErr())
+	print('错误码=' .. client1:getErr())
 
     return 0
  end

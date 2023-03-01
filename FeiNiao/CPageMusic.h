@@ -28,8 +28,12 @@ public:
 	virtual BOOL OnInitDialog();
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	void onNotifyData(int dataType, const std::map<string, string>* data);
-	void getSelectionMusics();
+	size_t getSelectionMusics();
 
 	
 	virtual LRESULT WindowProc(UINT message, WPARAM wParam, LPARAM lParam);
+	afx_msg void OnSelectionSelectall();
+	afx_msg void OnSelectionUnselectall();
+	virtual BOOL OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult);
+	afx_msg void OnNMRClickListMusic(NMHDR* pNMHDR, LRESULT* pResult);
 };

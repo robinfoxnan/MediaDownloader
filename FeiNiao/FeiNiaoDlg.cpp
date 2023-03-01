@@ -35,6 +35,9 @@ public:
 protected:
 	DECLARE_MESSAGE_MAP()
 
+public:
+	afx_msg void OnBnClickedCancel();
+	afx_msg void OnBnClickedOk();
 };
 
 CAboutDlg::CAboutDlg() : CDialogEx(IDD_ABOUTBOX)
@@ -48,8 +51,21 @@ void CAboutDlg::DoDataExchange(CDataExchange* pDX)
 
 BEGIN_MESSAGE_MAP(CAboutDlg, CDialogEx)
 	ON_WM_SIZE()
+	ON_BN_CLICKED(IDC_CANCEL, &CAboutDlg::OnBnClickedCancel)
+	ON_BN_CLICKED(IDOK, &CAboutDlg::OnBnClickedOk)
 END_MESSAGE_MAP()
 
+void CAboutDlg::OnBnClickedCancel()
+{
+	CDialogEx::OnCancel();
+}
+
+
+void CAboutDlg::OnBnClickedOk()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	CDialogEx::OnOK();
+}
 
 // CFeiNiaoDlg 对话框
 
@@ -78,6 +94,7 @@ BEGIN_MESSAGE_MAP(CFeiNiaoDlg, CDialogEx)
 	ON_WM_SIZE()
 	ON_COMMAND(ID_FILE_SETTING, &CFeiNiaoDlg::OnFileSetting)
 	ON_COMMAND(ID_FILE_SAVESCRIPT, &CFeiNiaoDlg::OnFileSavescript)
+	ON_COMMAND(ID_32787, &CFeiNiaoDlg::OnAbout)
 END_MESSAGE_MAP()
 
 
@@ -172,6 +189,11 @@ BOOL CFeiNiaoDlg::OnInitDialog()
 	
 	ShowWindow(SW_MAXIMIZE);
 	//ShowWindow(SW_NORMAL);
+	CAboutDlg aboutDia;
+	if (aboutDia.DoModal() != IDOK)
+	{
+		_exit(0);
+	}
 
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
@@ -282,3 +304,12 @@ void CFeiNiaoDlg::OnFileSavescript()
 	
 	GlobalData::instance().NotifyMessage(MSG_SCRIPT_SAVE);
 }
+
+
+void CFeiNiaoDlg::OnAbout()
+{
+	CAboutDlg aboutDia;
+	aboutDia.DoModal();
+}
+
+

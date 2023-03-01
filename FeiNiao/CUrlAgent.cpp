@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "../include/CUrlAgent.h"
 #include "StringUtils.h"
+#include "GlobalData.h"
 
 #define  SKIP_PEER_VERIFICATION    1  
 #define  SKIP_HOSTNAME_VERFICATION 1  
@@ -59,6 +60,8 @@ void CUrlAgent::appendBody(const char  *ptr, size_t size)
 {
 	//string str(ptr, size);
 	//ss << str;
+
+	allBytes += size;
 	if (fileMode == 0)
 	{
 		ss.write(ptr, size);
@@ -66,9 +69,10 @@ void CUrlAgent::appendBody(const char  *ptr, size_t size)
 	else
 	{
 		file.write(ptr, size);
+		GlobalData::progressInfo(this->url.c_str(), allBytes, 0);
 	}
 	
-	allBytes += size;
+	
 	//body.append(str);
 
 }
@@ -189,6 +193,7 @@ int CUrlAgent::getTest(const string &url, std::map<string, string>& headers, boo
 	if (bSaveFile)
 		fileMode = 1;
 
+	this->url = url;
 	status = 0;
 	curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
 
@@ -210,6 +215,9 @@ int CUrlAgent::getTest(const string &url, std::map<string, string>& headers, boo
 	}
 	if (file)
 		file.close();
+
+	// ֪ͨ
+	GlobalData::progressInfo(this->url.c_str(), allBytes, allBytes);
 
 	return code;
 }

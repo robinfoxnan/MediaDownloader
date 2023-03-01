@@ -54,7 +54,7 @@ public:
 	void showMsg(const string& str);
 	void clearMsg();
 	std::vector<string> getArgs();
-	void onNotifyData(int dataType, const std::map<string, string>& data);
+	void onNotifyData(int dataType, const std::map<string, string>* data);
 	void onStart();
 	void onStop();
 
@@ -74,6 +74,8 @@ public:
 	afx_msg void onClearList();
 	CButton mBtnDown;
 	CButton mBtnClear;
+	CStatic mTxtProgress;
+	virtual LRESULT WindowProc(UINT message, WPARAM wParam, LPARAM lParam);
 };
 
 

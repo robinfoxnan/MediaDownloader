@@ -33,11 +33,13 @@ public:
 	void tryLoadInfo();
 	void loadConfig();
 	
-	void startThread();
+	void startThread(int mode);
 	void stopThread();
 	void onStopThread();
 	void setSearchkeys(std::vector<string> & other);
 	void setMusicVec(MusicVector & other);
+
+	int getUrlIndex(const string& url);
 
 	string getDefaultDir();
 	void   setDefaultDir(const string& str);
@@ -50,8 +52,10 @@ public:
 	}
 
 	static void exeScript(GlobalData* lpData);
+	static void exeDownloadMusic(GlobalData* lpData);
 	static void printMessage(const string& content);
 	static void onNotifyData(int dataType, const std::map<string, string>& data);
+	static void progressInfo(const char* url, size_t bytes, size_t all);
 	
 
 	

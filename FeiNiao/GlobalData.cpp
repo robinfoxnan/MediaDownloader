@@ -18,13 +18,30 @@ CPageVideo* GlobalData::pPageVideo = nullptr;
 CPageLog* GlobalData::pPageLog = nullptr;
 
 
-
-// interface for lua
-void GlobalData::printMessage(const string& content)
+void GlobalData::progressInfo(const char* url, size_t bytes, size_t all)
 {
 	if (pRightView)
 	{
-		pRightView->showMsg(content);
+		std::map<string, string> vec;
+		vec.insert(std::make_pair<string, string>("url", url));
+		vec.insert(std::make_pair<string, string>("bytes", std::to_string(bytes)));
+		if (all == 0)
+			vec.insert(std::make_pair<string, string>("all", "--"));
+		else
+			vec.insert(std::make_pair<string, string>("all", std::to_string(all)));
+
+		int lineIndex = GlobalData::instance().getUrlIndex(url);
+		vec.insert(std::make_pair<string, string>("i", std::to_string(lineIndex)) );
+		
+		pRightView->SendMessage(MSG_DOWNLOAD_PROGRESS, lineIndex, (LPARAM)&vec);
+	}
+}
+// interface for lua
+void GlobalData::printMessage(const string& content)
+{
+	if (GlobalData::pRightView)
+	{
+		GlobalData::pRightView->showMsg(content);
 	}
 }
 
@@ -71,6 +88,18 @@ GlobalData::~GlobalData()
 std::map<string, string>& GlobalData::getScripts()
 {
 	return this->fileMap;
+}
+
+int GlobalData::getUrlIndex(const string& url)
+{
+	for (auto& item : musicVec)
+	{
+		if (item->url == url)
+		{
+			return item->index;
+		}
+	}
+	return -1;
 }
 
 void EnumerateFiles(string &pathMain, string csPath, std::map<string, string>& strArray)
@@ -279,16 +308,40 @@ void GlobalData::exeScript(GlobalData* lpData)
 
 }
 
+void GlobalData::exeDownloadMusic(GlobalData* lpData)
+{
+	HttpClient client;
+	printMessage("开始下载 ");
+	for (auto& item : lpData->musicVec)
+	{
+		HttpHeader header;
+		string ext = PathUtil::getExt(item->url);
+		string name = item->downloadName;
+		string filePath = PathUtil::combinePath(lpData->dirDefault.c_str(), name.c_str());
+		client.getAsFile(item->url, header, filePath);
+	}
+	printMessage("下载结束 ");
+	lpData->onStopThread();
+}
+
 void GlobalData::onStopThread()
 {
 	if (pRightView)
 		pRightView->onStop();
 
 }
-void GlobalData::startThread()
+void GlobalData::startThread(int mode)
 {
 	stopThread();
-	this->workerThread = std::make_shared<std::thread>(GlobalData::exeScript, this);
+	if (mode == 0)
+	{
+		this->workerThread = std::make_shared<std::thread>(GlobalData::exeScript, this);
+	}
+	else if (mode == 1)
+	{
+		this->workerThread = std::make_shared<std::thread>(GlobalData::exeDownloadMusic, this);
+	}
+	
 
 }
 
