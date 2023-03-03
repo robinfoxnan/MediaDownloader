@@ -9,8 +9,10 @@
 #include "afxdialogex.h"
 #include "GlobalData.h"
 #include "CSettingDialog.h"
+#include "LuaExtension.h"
 
 
+using namespace bird2fish;
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
@@ -189,11 +191,13 @@ BOOL CFeiNiaoDlg::OnInitDialog()
 	
 	ShowWindow(SW_MAXIMIZE);
 	//ShowWindow(SW_NORMAL);
-	CAboutDlg aboutDia;
+	/*CAboutDlg aboutDia;
 	if (aboutDia.DoModal() != IDOK)
 	{
 		_exit(0);
-	}
+	}*/
+
+	
 
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }

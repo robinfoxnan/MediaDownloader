@@ -78,6 +78,9 @@
     <ClInclude Include="include\IniParser.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="LuaExtension.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="FeiNiao.cpp">
@@ -135,6 +138,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="IniParser.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="LuaExtension.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

@@ -17,6 +17,8 @@ extern "C" {
 #include "UrlEncoding.h"
 #include <functional>
 
+#include "LuaExtension.h"
+
 using namespace std;
 using namespace luabridge;
 using namespace luabridge::detail;
@@ -156,13 +158,23 @@ namespace bird2fish
 				return L;
 
 			this->L = luaL_newstate();
+			// 将 Lua 标准库加载到 Lua 环境中
 			luaL_openlibs(L);
-			//luaL_Reg
-		
-			//luaL_requiref(L, "md5", "luaopen_md5_core", 1);
+
+			// 将自定义 Lua 模块所在的路径添加到 package.path
+			/*lua_getglobal(L, "package");
+			lua_getfield(L, -1, "path");
+			std::string path = lua_tostring(L, -1);
+			path.append(";path/to/my/module/?.lua");
+			lua_pop(L, 1);
+			lua_pushstring(L, path.c_str());
+			lua_setfield(L, -2, "path");
+			lua_pop(L, 1);*/
 
 			// 先注册自己提供的接口函数
 			registerGlobal(L);	
+
+			LuaExtension::instance().regFunctions(L);
 			return this->L;
 		}
 
@@ -175,10 +187,8 @@ namespace bird2fish
 		}
 
 		private:
-			
-
 			lua_State* L = nullptr;
-			
+
 			// lua script informations	
 			string author;
 			double version;

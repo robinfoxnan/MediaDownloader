@@ -1,0 +1,5 @@
+LIBRARY libxml2_pp
+ 
+EXPORTS
+luaopen_libxml2pp @1
+

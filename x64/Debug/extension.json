@@ -1,0 +1,5 @@
+{
+	"dll_extension": [
+		{"function": "libxml2pp", "file": "libxml2_pp.dll"}
+	]
+}

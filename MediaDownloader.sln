@@ -5,6 +5,8 @@ VisualStudioVersion = 16.0.33027.164
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FeiNiao", "FeiNiao\FeiNiao.vcxproj", "{DA26F3A5-2CE3-4D31-90B5-5DF477EA9B9C}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libxml2_pp", "libxml2_pp\libxml2_pp.vcxproj", "{98130DCE-939D-49B0-84DC-923CD1C2833B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -21,6 +23,14 @@ Global
 		{DA26F3A5-2CE3-4D31-90B5-5DF477EA9B9C}.Release|x64.Build.0 = Release|x64
 		{DA26F3A5-2CE3-4D31-90B5-5DF477EA9B9C}.Release|x86.ActiveCfg = Release|Win32
 		{DA26F3A5-2CE3-4D31-90B5-5DF477EA9B9C}.Release|x86.Build.0 = Release|Win32
+		{98130DCE-939D-49B0-84DC-923CD1C2833B}.Debug|x64.ActiveCfg = Debug|x64
+		{98130DCE-939D-49B0-84DC-923CD1C2833B}.Debug|x64.Build.0 = Debug|x64
+		{98130DCE-939D-49B0-84DC-923CD1C2833B}.Debug|x86.ActiveCfg = Debug|Win32
+		{98130DCE-939D-49B0-84DC-923CD1C2833B}.Debug|x86.Build.0 = Debug|Win32
+		{98130DCE-939D-49B0-84DC-923CD1C2833B}.Release|x64.ActiveCfg = Release|x64
+		{98130DCE-939D-49B0-84DC-923CD1C2833B}.Release|x64.Build.0 = Release|x64
+		{98130DCE-939D-49B0-84DC-923CD1C2833B}.Release|x86.ActiveCfg = Release|Win32
+		{98130DCE-939D-49B0-84DC-923CD1C2833B}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

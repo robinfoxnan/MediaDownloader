@@ -78,6 +78,7 @@ GlobalData::GlobalData()
 	curSelected = "";
 	workerThread = nullptr;
 	loadConfig();
+	LuaExtension::instance().load();
 }
 
 GlobalData::~GlobalData()

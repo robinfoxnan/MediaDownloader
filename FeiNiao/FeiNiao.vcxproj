@@ -201,6 +201,7 @@
     <ClInclude Include="include\LuaPlugin.h" />
     <ClInclude Include="include\PathUtil.h" />
     <ClInclude Include="include\StringUtils.h" />
+    <ClInclude Include="LuaExtension.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="RobinEditor.h" />
@@ -222,6 +223,7 @@
     <ClCompile Include="GlobalData.cpp" />
     <ClCompile Include="IniParser.cpp" />
     <ClCompile Include="Json11.cpp" />
+    <ClCompile Include="LuaExtension.cpp" />
     <ClCompile Include="LuaPlugin.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
