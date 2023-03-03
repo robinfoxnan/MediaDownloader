@@ -1,32 +1,23 @@
-author = "Robin-Fox"
+require("demo_module")
+
+author = "Robin"
 version = 1.0
 
 setting = {
-    name = "测试基础string相关",
+    name = "脚本依赖方法演示脚本",
     dir = "d:\\",
-	desc = "测试内置函数库",
+	desc = "演示内置require的功能",
 	input1 = "搜索词",
 	input2 = "页号",
-	input2 = "条数/页",
+	input3 = "条数/页",
 }
 
 
-local person = {}
-function person:new(name, age, gender)
-	  local obj = {name = name, age = age, gender = gender}
-	  setmetatable(obj, self)
-	  self.__index = self
-	  return obj
-end
-
 function lua_main(keyWord, pageIndex, pageSize)
-	--printMessage 仅能接收字符串
-
-	local alice = person:new("Alice", 25, "female")
-	print(alice.name)
-	print(alice.age)
-	print(alice.gender)
+    
+	demo_module.func3()
+    
 
 
     return 0
- end
+end

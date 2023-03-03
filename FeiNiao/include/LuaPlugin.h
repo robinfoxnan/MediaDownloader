@@ -161,15 +161,22 @@ namespace bird2fish
 			// 将 Lua 标准库加载到 Lua 环境中
 			luaL_openlibs(L);
 
+			/*string dir = PathUtil::getAppPath();
+			string fileDir = PathUtil::combinePath(dir.c_str(), "../lualib/?.lua");
+			string temp = ";";
+			temp += fileDir;*/
+
 			// 将自定义 Lua 模块所在的路径添加到 package.path
-			/*lua_getglobal(L, "package");
-			lua_getfield(L, -1, "path");
-			std::string path = lua_tostring(L, -1);
-			path.append(";path/to/my/module/?.lua");
-			lua_pop(L, 1);
-			lua_pushstring(L, path.c_str());
-			lua_setfield(L, -2, "path");
-			lua_pop(L, 1);*/
+			//lua_getglobal(L, "package");
+			//lua_getfield(L, -1, "path");
+			//std::string path = lua_tostring(L, -1);
+			//FileUtil::writeFile(path, "d:\\testpath.txt");
+			//path.append(temp.c_str());
+			////path.append(";path/to/my/module/?.lua");
+			//lua_pop(L, 1);
+			//lua_pushstring(L, path.c_str());
+			//lua_setfield(L, -2, "path");
+			//lua_pop(L, 1);
 
 			// 先注册自己提供的接口函数
 			registerGlobal(L);	

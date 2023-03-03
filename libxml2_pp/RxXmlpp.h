@@ -78,10 +78,12 @@ namespace bird2fish
 		std::vector<Xml2Node> getChildrenByName(const string& eleName, const string& attrName = "", const string& attrVal = "");
 		std::vector<Xml2Node> getDeepElementsByName(const string& eleName, const string& attrName = "", const string& attrVal = "");
 		std::vector<Xml2Node> xpath(const string& npath);
+
+		Xml2Node getChildByIndex(const string& name, int index);
 		Xml2Node getParent();
 		Xml2Node getPreBrother();
 		Xml2Node getNextBrother();
-		Xml2Node getChildByIndex(const string &name, int index);
+		
 		
 
 	private:

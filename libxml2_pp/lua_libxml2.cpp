@@ -51,12 +51,17 @@ int luaopen_libxml2pp(lua_State* L)
 
 	// Array的At函数比较麻烦，这里映射为全局函数
 	auto funcAttrAt = std::function <Xml2Attr(const std::vector<Xml2Attr>*, int)>(
-		[](const std::vector<Xml2Attr>* vec, int i) { return (*vec)[i]; }
+		[](const std::vector<Xml2Attr>* vec, int i) { 
+			if (i < 0 || i >= vec->size()) return Xml2Attr(nullptr);
+			return (*vec)[i]; 
+		}
 	);
 
 	// Array的At函数比较麻烦，这里映射为全局函数
 	auto funcNodeAt = std::function <Xml2Node(const std::vector<Xml2Node>*, int)>(
-		[](const std::vector<Xml2Node>* vec, int i) { return (*vec)[i]; }
+		[](const std::vector<Xml2Node>* vec, int i) { 
+			if (i < 0 || i >= vec->size()) return Xml2Node(nullptr);
+			return (*vec)[i]; }
 	);
 
 	luabridge::getGlobalNamespace(L)

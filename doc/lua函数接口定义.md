@@ -80,7 +80,7 @@ local code = client:doGet(url, header)
 
 
 
-### 三、HTTP操作功能
+### 三、HTTP相关操作功能
 
 描述HTTP1.1 的header部分使用类：
 
@@ -310,10 +310,232 @@ JsonArray表示一个Json数组队形，成员函数如下：
 
 
 
-
 #### 3.3 HTML与XML编解码功能
 
-未实现
+##### 3.3.1 解析
+
+通过扩展库libxml2_pp.dll实现了相关的解析功能，这里封装了libxml2的功能，所以有些参数与该库保持一致；
+
+全局函数
+| 函数           | 参数类型            | 返回类型 | 说明                              |
+| -------------- | ------------------- | -------- | --------------------------------- |
+| parseXmlFile   | string, string, int | Xml2Doc  | 尝试从本地文件加载xml或者html文件 |
+| parseXmlString | string,string, int  | Xml2Doc  | 尝试从字符串加载xml或者html文件   |
+
+示例如下：
+
+```lua
+xmlStr=[[<?xml version="1.0" encoding="GBK"?>
+<root>
+  <person name="Alice" age='25'/>
+  <person name="Bob" age="30"/>
+  <person name="Charlie" age="35"/>
+</root>]]
+
+	-- XML_PARSE_NOBLANKS
+	opt =  256
+	doc = parseXmlString(xmlStr, "GBK", opt)
+    if (doc:isNull()) then
+        printMessage("解析遇到错误")
+		printMessage(doc:getErr())
+		return -1
+    end
+```
+
+第2个参数为字符集，网络返回的数据默认是utf-8，本地显示需要转换为ansi；
+
+第3个参数为选项，比如XML_PARSE_NOBLANKS，表示跳过空白的文本，不解析为节点，
+
+某些情况下html解析遇到各种错误，就需要设置忽略或者不提示，各种参数的定义如下：
+
+```c++
+typedef enum {
+    XML_PARSE_RECOVER	= 1<<0,	/* recover on errors */
+    XML_PARSE_NOENT	= 1<<1,	/* substitute entities */
+    XML_PARSE_DTDLOAD	= 1<<2,	/* load the external subset */
+    XML_PARSE_DTDATTR	= 1<<3,	/* default DTD attributes */
+    XML_PARSE_DTDVALID	= 1<<4,	/* validate with the DTD */
+    XML_PARSE_NOERROR	= 1<<5,	/* suppress error reports */
+    XML_PARSE_NOWARNING	= 1<<6,	/* suppress warning reports */
+    XML_PARSE_PEDANTIC	= 1<<7,	/* pedantic error reporting */
+    XML_PARSE_NOBLANKS	= 1<<8,	/* remove blank nodes */
+    XML_PARSE_SAX1	= 1<<9,	/* use the SAX1 interface internally */
+    XML_PARSE_XINCLUDE	= 1<<10,/* Implement XInclude substitution  */
+    XML_PARSE_NONET	= 1<<11,/* Forbid network access */
+    XML_PARSE_NODICT	= 1<<12,/* Do not reuse the context dictionary */
+    XML_PARSE_NSCLEAN	= 1<<13,/* remove redundant namespaces declarations */
+    XML_PARSE_NOCDATA	= 1<<14,/* merge CDATA as text nodes */
+    XML_PARSE_NOXINCNODE= 1<<15,/* do not generate XINCLUDE START/END nodes */
+    XML_PARSE_COMPACT   = 1<<16,/* compact small text nodes; no modification of
+                                   the tree allowed afterwards (will possibly
+				   crash if you try to modify the tree) */
+    XML_PARSE_OLD10	= 1<<17,/* parse using XML-1.0 before update 5 */
+    XML_PARSE_NOBASEFIX = 1<<18,/* do not fixup XINCLUDE xml:base uris */
+    XML_PARSE_HUGE      = 1<<19,/* relax any hardcoded limit from the parser */
+    XML_PARSE_OLDSAX    = 1<<20,/* parse using SAX2 interface before 2.7.0 */
+    XML_PARSE_IGNORE_ENC= 1<<21,/* ignore internal document encoding hint */
+    XML_PARSE_BIG_LINES = 1<<22 /* Store big lines numbers in text PSVI field */
+} xmlParserOption;
+```
+
+##### 3.3.2 文档对象
+
+XmlDoc类表示文档对象，从该类可以执行xpath，或获取根节点进一步操作
+| 函数        | 参数类型               | 返回类型     | 说明                                                         |
+| ----------- | ---------------------- | ------------ | ------------------------------------------------------------ |
+| isNull      | 无                     | bool         | 用于检查是否解析成功                                         |
+| getRoot     | string                 | XmlNode      | 获取根节点                                                   |
+| getErr      | 无                     | string       | 出错的时候，用于获取错误信息                                 |
+| xpath       | string                 | XmlNodeArray | 通过xpath方式索引所有的节点，返回集合                        |
+| xpathSimple | string, string, string | XmlNodeArray | 通过节点名，属性名（可选），属性值（可选）索引所有的节点，返回集合，这个是通过递归函数实现的，主要是因为某些情况下xpath不可用 |
+
+##### 3.3.3 节点对象
+
+XmlNode类表示节点，通过getType可以了解节点类型，这里仅仅关心Element类型，
+
+| 函数                | 参数类型               | 返回类型     | 说明                                                         |
+| ------------------- | ---------------------- | ------------ | ------------------------------------------------------------ |
+| isNull              | 无                     | bool         | 检测是否可用，集合一般不需要检查，只有返回的单个值需要       |
+| getType             | 无                     | int          | 与libxml2保持一致                                            |
+| getName             | 无                     | string       | 节点名字                                                     |
+| getValue            | 无                     | string       | 带有Text文本的可以返回数据                                   |
+| getAttrsAll         | 无                     | XmlAttrArray | 获取所有属性的集合                                           |
+| getAttrByName       | string                 | XmlAttr      | 根据名字查找属性，需要检查返回值是否可用                     |
+| getChildrenElements | 无                     | XmlNodeArray | 获取一级子节点中所有的Element类型元素                        |
+| getChildrenByType   | int                    | XmlNodeArray | 获取一级子节点中所有的某类型元素                             |
+| getChildrenByName   | string                 | XmlNodeArray | 获取一级子节点中所有的符合某个名字的元素                     |
+| xpath               | string                 | XmlNodeArray | 执行xpath搜索                                                |
+| xpathSimple         | string, string, string | XmlNodeArray | **通过节点名，属性名（可选），属性值（可选）索引所有的节点，返回集合，这个是通过递归函数实现的，主要是因为某些情况下xpath不可用** |
+| getChildByIndex     | string , int           | XmlNode      | 在同名的一级子节点中，按下标提取子节点，如果下标越界，返回节点是空的，需要检测isNull |
+| getParent           | 无                     | XmlNode      | 返回父亲节点                                                 |
+| getPreBother        | 无                     | XmlNode      | 返回兄弟节点                                                 |
+| getNextBorther      | 无                     | XmlNode      | 返回兄弟节点                                                 |
+
+部分示例如下：
+
+```lua
+	root = doc:getRoot()
+	
+	nodeArray = root:getChildrenElements()
+	local i = 1
+	for i=1, nodeArray:size() do
+		--item = jsonAt(valArray, i-1)
+		item = nodeArray:at(i-1)
+		
+		printMessage(item:getName() .. ": " .. printAttrs(item))
+	
+	 end
+
+```
+
+其中需要说明的是type类型，当然一般情况下都是需要解析html只需要关注Element，或者查找就足够了
+
+在原来的libxml2中节点类型定义如下：
+
+```c++
+typedef enum {
+    XML_ELEMENT_NODE=		1,
+    XML_ATTRIBUTE_NODE=		2,
+    XML_TEXT_NODE=		3,
+    XML_CDATA_SECTION_NODE=	4,
+    XML_ENTITY_REF_NODE=	5,
+    XML_ENTITY_NODE=		6,
+    XML_PI_NODE=		7,
+    XML_COMMENT_NODE=		8,
+    XML_DOCUMENT_NODE=		9,
+    XML_DOCUMENT_TYPE_NODE=	10,
+    XML_DOCUMENT_FRAG_NODE=	11,
+    XML_NOTATION_NODE=		12,
+    XML_HTML_DOCUMENT_NODE=	13,
+    XML_DTD_NODE=		14,
+    XML_ELEMENT_DECL=		15,
+    XML_ATTRIBUTE_DECL=		16,
+    XML_ENTITY_DECL=		17,
+    XML_NAMESPACE_DECL=		18,
+    XML_XINCLUDE_START=		19,
+    XML_XINCLUDE_END=		20
+    /* XML_DOCB_DOCUMENT_NODE=	21 */ /* removed */
+} xmlElementType;
+```
+
+
+
+##### 3.3.4 节点集合对象
+
+XmlNodeArray
+
+| 函数 | 参数类型 | 返回类型 | 说明               |
+| ---- | -------- | -------- | ------------------ |
+| size |          | int      | 获取集合中元素个数 |
+| at   | int      | XmlNode  | 通过下标获取元素   |
+
+使用方法如下：
+
+```lua
+root = doc:getRoot()
+	
+	nodeArray = root:getChildrenElements()
+	local i = 1
+	for i=1, nodeArray:size() do
+		--item = jsonAt(valArray, i-1)
+		item = nodeArray:at(i-1)
+		
+		printMessage(item:getName() .. ": " .. printAttrs(item))
+	
+	 end
+```
+
+
+
+##### 3.3.5 属性对象
+
+XmlAttr用于描述Element对象的各种属性，
+
+| 函数    | 参数类型 | 返回类型 | 说明                         |
+| ------- | -------- | -------- | ---------------------------- |
+| isNull  | 无       | bool     | 检测是否合法，一般不需要检测 |
+| getName | 无       | string   | 名字                         |
+| getVale | 无       | string   | 值                           |
+
+##### 3.3.6 属性集合对象
+
+XmlAttrArray
+
+| 函数 | 参数类型 | 返回类型 | 说明               |
+| ---- | -------- | -------- | ------------------ |
+| size | 无       | int      | 获取集合中元素个数 |
+| at   | int      | XmlAttr  | 通过下标获取元素   |
+
+使用方法如下：
+
+```lua
+function printAttrs(node)
+	attrArray = node:getAttrsAll()
+	local i = 1
+	msg = ""
+	for i=1, attrArray:size()  do
+		attr = attrArray:at(i-1)
+		msg = msg .. attr:getName() .. " = " .. attr:getValue() .. ", "
+		
+	end
+	return msg
+end
+```
+
+##### 3.3.7 查找与索引xpath
+
+在爬虫项目中，需要各种解析，xpath使用广泛，但是在html编码错误的情况下，可能需要递归方式查找，
+
+```lua
+root = doc:getRoot()
+nodeList = root:xpath("//div[@class='audio']")
+```
+
+如果xpath无法执行，则需要使用递归方式查找，该方式实现的功能相对简单，但是实用
+```lua
+root = doc:getRoot()
+nodeList = root:xpathManual("div", "class", "audio")
+```
 
 
 
@@ -362,6 +584,16 @@ JsonArray表示一个Json数组队形，成员函数如下：
     str = readFileAsString(fileName)
     print(str)
 ```
+
+
+
+#### 3.5 加解密
+
+##### 3.5.1 md5
+
+##### 3.5.2 sha1
+
+##### 3.5.3 base64
 
 
 
@@ -451,4 +683,45 @@ local tbl = {
 ```
 
 返回的数据使用table方式，但是键值的固定的！
+
+####  5.5 扩展功能接口
+
+##### 5.5.1 dll
+
+dll的扩展需要在dll中导出luaopen_name这样的函数用于注册所有的功能，
+
+比如libxml2_pp.dll中定义如下;
+
+```c++
+#ifdef _cplusplus  
+extern "C" {
+#endif
+#include <lua.h>
+#include <lauxlib.h>
+#include <lualib.h>
+	
+int luaopen_libxml2pp(lua_State* L);
+
+#ifdef _cplusplus 
+}
+#endif
+```
+
+然后在exe所在的目录中找到extension.json，编辑该文件
+
+```json
+{
+	"dll_extension": [
+		{"function": "libxml2pp", "file": "libxml2_pp.dll"}
+	]
+}
+```
+
+这里的function就是导出函数的后面的名字部分，file就是文件位置；
+
+这样就可以实现各种定制与扩展了。
+
+
+
+##### 5.5.2 脚本的扩展
 
