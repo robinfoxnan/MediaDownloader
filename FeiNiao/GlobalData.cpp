@@ -313,12 +313,16 @@ void GlobalData::exeDownloadMusic(GlobalData* lpData)
 {
 	HttpClient client;
 	printMessage("开始下载 ");
+	
 	for (auto& item : lpData->musicVec)
 	{
 		HttpHeader header;
 		string ext = PathUtil::getExt(item->url);
 		string name = item->downloadName;
 		string filePath = PathUtil::combinePath(lpData->dirDefault.c_str(), name.c_str());
+
+		string info = "准备下载：" + std::to_string(item->index +1) + " " + filePath;
+		printMessage(info);
 		client.getAsFile(item->url, header, filePath);
 	}
 	printMessage("下载结束 ");

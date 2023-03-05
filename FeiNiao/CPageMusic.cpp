@@ -126,6 +126,7 @@ void CPageMusic::onNotifyData(int dataType, const std::map<string, string>* data
 	std::stringstream ss;
 	string bytes;
 	string all;
+	string temp, prefix, http;
 	switch (dataType)
 	{
 	case -1:
@@ -142,6 +143,20 @@ void CPageMusic::onNotifyData(int dataType, const std::map<string, string>* data
 		mList.SetItemText(i, 4, data->at("tags").c_str());
 		mList.SetItemText(i, 5, data->at("size").c_str());
 		mList.SetItemText(i, 6, data->at("url").c_str());
+
+		temp = data->at("url");
+		StringUtils::toLower(temp);
+		if (temp.length() < 0)
+		{
+			mList.SetItemState(i, 0, -1);
+
+		}
+		prefix = temp.substr(0, 4);
+		http = _T("http");
+		if (prefix != http)
+		{
+			mList.SetItemState(i, 0, -1);
+		}
 
 		mList.Invalidate(TRUE);
 		break;
@@ -198,9 +213,42 @@ size_t CPageMusic::getSelectionMusics()
 		item->singer = mList.GetItemText(i, 1);
 		item->song = mList.GetItemText(i, 2);
 		item->url = mList.GetItemText(i, 6);
+
+		string ext = PathUtil::getExt(item->url);
+		if (ext.length() > 4)
+		{
+			auto pos = ext.find('?');
+			if (pos != string::npos)
+			{
+				ext = ext.substr(0, pos);
+			}
+			else
+			{
+				ext = ext.substr(0, 4);
+			}
+		}
 		item->downloadName = item->singer + "-";
 		item->downloadName += item->song;
-		item->downloadName += PathUtil::getExt(item->url);
+		item->downloadName += ext;
+
+
+
+		string temp = item->url;
+		StringUtils::toLower(temp);
+		if (temp.length() < 0)
+		{
+			mList.SetItemText(i, 7, "无法下载");
+			continue;
+		}
+		string prefix = temp.substr(0, 4);
+		string http = _T("http");
+		//bool ret1 = prefix == http;
+		//int ret = prefix.compare(http);
+		if (prefix != http)
+		{
+			mList.SetItemText(i, 7, "无法下载");
+			continue;
+		}
 		vec.emplace_back(item);
 	}
 
