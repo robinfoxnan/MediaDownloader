@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "RobinEditor.h"
+#include <Scintilla.h>
 
 
 /* XPM */
@@ -90,20 +91,37 @@ void RobinEditor::SetAStyle(int style, COLORREF fore, COLORREF back, int size, c
 
 void RobinEditor::setup()
 {
+	// 代码页
+	UINT codepage = _getmbcp(); // GetConsoleOutputCP();
+	this->SetCodePage(codepage);
 
-	const TCHAR* luaKeyWords0
-	{ _T("and break do else elseif ")
+	const TCHAR* luaKeyWords{ 
+		_T("and break do else elseif ")
 		_T("end for function goto if in ")
-			_T("local not or repeat ")
+		_T(" not or repeat ")
 		_T("return then until while ")
 	};
 
-	const TCHAR* luaKeyWords1
-	{ _T("HttpHeader  HttpClient")
+	const TCHAR* luaKeyWords2{ 
+		_T("local lua_main ")
 	};
 
-	const TCHAR* luaKeyWords2
-	{ _T("isNull isNumber isString isArray")
+	// 全局函数和全局类
+	const TCHAR* luaKeyWords3{   
+		_T("math string print printMessage notifyData parseXmlString parseXmlFile  ")
+		_T("intToJson stringToJson numToJson parseJsonStr parseJsonFile ")
+		_T("combinePath mkDir readFileAsString writeToFile fileExist")
+		_T("ansiToUtf8 utf8ToAnsi urlEncodeAnsi urlDecodeAnsi ")
+	    _T("HttpHeader HttpClient JsonObject Json JsonArray ")
+	};
+
+	// 
+	const TCHAR* luaKeyWords4{ 
+		_T("setItem getItem getItems ")   // Httpheader
+		_T("doGet doGetToFile getBodyAsString getBodyAsAnsiString getBodyAsJson getHeader getSize getErr ")
+		_T("size clear append appendInt appendNum appendStr at toJson ")
+		_T("set setInt setStr setNum remove ")
+		_T("isNull isNumber isString isArray isObject toInt toBool toString toArray get dump ")
 	};
 
 	/*const TCHAR* g_cppKeyWords
@@ -117,24 +135,30 @@ void RobinEditor::setup()
 	 _T("virtual void volatile wchar_t while xor xor_eq") };
 
 	 */
-	this->SetKeyWords(0, luaKeyWords0);
-	this->SetKeyWords(1, luaKeyWords1);
-	this->SetKeyWords(2, luaKeyWords2);
+	this->SetKeyWords(0, luaKeyWords);
+	this->SetKeyWords(1, luaKeyWords2);
+	this->SetKeyWords(2, luaKeyWords3);
+	this->SetKeyWords(3, luaKeyWords4);
 
+	/*auto puncChars = this->GetPunctuationChars();
+	puncChars += ":";
+	this->SetPunctuationChars(puncChars);*/
+
+	/*auto whiteChars = this->GetWhitespaceChars();
+	whiteChars += ":";
+	this->SetWhitespaceChars(whiteChars);*/
 
 	//_setmbcp(932);
 
-	UINT codepage = _getmbcp(); // GetConsoleOutputCP();
-	this->SetCodePage(codepage);
-
-
-	//Setup styles
-	SetAStyle(static_cast<int>(Scintilla::StylesCommon::Default), RGB(0, 0, 0), RGB(0xff, 0xff, 0xff), 11, "Verdana");
-
+	
+	// 默认字体
+	//SetAStyle(static_cast<int>(Scintilla::StylesCommon::Default), RGB(0, 0, 0), RGB(0xff, 0xff, 0xff), 11, "Verdana");
+	SetAStyle(static_cast<int>(Scintilla::StylesCommon::Default), RGB(0, 0, 0), RGB(0xff, 0xff, 0xff), 12, "Consolas");
+	
 	
 
 	this->StyleClearAll();
-	SetAStyle(SCE_C_DEFAULT, RGB(0, 0, 0));
+	/*SetAStyle(SCE_C_DEFAULT, RGB(0, 0, 0));
 	SetAStyle(SCE_C_COMMENT, RGB(0, 0x80, 0));
 	SetAStyle(SCE_C_COMMENTLINE, RGB(0, 0x80, 0));
 	SetAStyle(SCE_C_COMMENTDOC, RGB(0, 0x80, 0));
@@ -147,23 +171,33 @@ void RobinEditor::setup()
 	SetAStyle(SCE_C_STRING, RGB(0x80, 0, 0x80));
 	SetAStyle(SCE_C_IDENTIFIER, RGB(0, 0xaa, 0));
 	SetAStyle(SCE_C_PREPROCESSOR, RGB(0x80, 0, 0));
-	SetAStyle(SCE_C_OPERATOR, RGB(0x80, 0x80, 0));
+	SetAStyle(SCE_C_OPERATOR, RGB(0x80, 0x80, 0));*/
 
 	SetAStyle(SCE_LUA_DEFAULT, RGB(0, 0, 0));
 	SetAStyle(SCE_LUA_COMMENT, RGB(0, 0x80, 0));
 	SetAStyle(SCE_LUA_COMMENTLINE, RGB(0, 0x80, 0));
 	SetAStyle(SCE_LUA_COMMENTDOC, RGB(0, 0x80, 0));
-	SetAStyle(SCE_LUA_NUMBER, RGB(0, 0x80, 0x80));
-	SetAStyle(SCE_LUA_WORD, RGB(0, 0, 0xFF));
-	this->StyleSetBold(SCE_LUA_WORD, 1);
-	SetAStyle(SCE_LUA_STRING, RGB(0x80, 0, 0x80));
-	SetAStyle(SCE_LUA_IDENTIFIER, RGB(0xaa, 0, 0));
-	SetAStyle(SCE_LUA_PREPROCESSOR, RGB(0x80, 0, 0));
-	SetAStyle(SCE_LUA_OPERATOR, RGB(0x80, 0x80, 0));
+	SetAStyle(SCE_LUA_NUMBER, RGB(0, 0x80, 0x80)); // 数字，青色
 
-	SetAStyle(SCE_LUA_WORD2, RGB(0, 0, 0x80));
-	SetAStyle(SCE_LUA_WORD3, RGB(0, 0, 0x80));
-	SetAStyle(SCE_LUA_WORD4, RGB(0, 0, 0x80));
+	SetAStyle(SCE_LUA_WORD, RGB(177, 20, 144));    // 关键字，浅紫色
+	//this->StyleSetBold(SCE_LUA_WORD, 1);
+
+	SetAStyle(SCE_LUA_STRING, RGB(163, 21, 21));       // 双引号字符，暗红色，斜体     
+	SetAStyle(SCE_LUA_LITERALSTRING, RGB(163, 21, 21));// 多行字符串
+	SetAStyle(SCE_LUA_CHARACTER, RGB(163, 21, 21));    // 引号字符串
+	//this->StyleSetItalic(SCE_LUA_CHARACTER, 1);
+	//this->StyleSetItalic(SCE_LUA_STRING, 1);      
+	//this->StyleSetItalic(SCE_LUA_LITERALSTRING, 1);
+	//StyleSetBold(SCE_LUA_CHARACTER, 0);
+
+	SetAStyle(SCE_LUA_IDENTIFIER, RGB(0, 0, 139));       // 藏蓝色
+	SetAStyle(SCE_LUA_PREPROCESSOR, RGB(255, 0, 0));     // 预处理器 $开头
+	SetAStyle(SCE_LUA_OPERATOR, RGB(0x0, 44, 250));     // 括号
+
+	// 设置函数名样式
+	SetAStyle(SCE_LUA_WORD2, RGB(0, 44, 250));      // local 
+	SetAStyle(SCE_LUA_WORD3, RGB(120, 92, 33));     // 类名自定义 全局内置函数
+	SetAStyle(SCE_LUA_WORD4, RGB(255, 165, 0));     // 成员函数,橙色 
 	SetAStyle(SCE_LUA_WORD5, RGB(0, 0, 0x80));
 	SetAStyle(SCE_LUA_WORD6, RGB(0, 0, 0x80));
 	SetAStyle(SCE_LUA_WORD7, RGB(0, 0, 0x80));
@@ -231,6 +265,7 @@ void RobinEditor::setup()
 	this->SetUseTabs(true);
 	// 索引指引虚线
 	this->SetIndentationGuides(Scintilla::IndentView::LookBoth);
+
 
 }
 

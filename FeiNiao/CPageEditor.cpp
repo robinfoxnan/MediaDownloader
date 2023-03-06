@@ -190,6 +190,24 @@ BOOL CPageEditor::PreTranslateMessage(MSG* pMsg)
 				string str = onPaste();
 				pEditor->setPaste(str);
 			}
+			else if (pMsg->wParam == 'A')
+			{
+				
+				auto pos = pEditor->GetTextLength();
+				pEditor->SetSel(0, pos);
+			}
+			else if (pMsg->wParam == 'X')
+			{
+				string str = pEditor->getSelection();
+				OnCopy(str);
+				pEditor->setPaste("");
+
+			}
+			else if (pMsg->wParam == 'Z')
+			{
+		
+				pEditor->Undo();
+			}
 			return TRUE; // 表示消息已经处理过了
 		}
 	}

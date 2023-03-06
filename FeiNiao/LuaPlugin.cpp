@@ -393,8 +393,6 @@ bool LuaPlugin::registerGlobal(lua_State* L)
 	getGlobalNamespace(L).addFunction("writeToFile", FileUtil::writeFile);
 	getGlobalNamespace(L).addFunction("fileExist", PathUtil::fileExist);
 	
-
-
 	// 结构体操作
 
 	// 字符串处理
@@ -404,7 +402,6 @@ bool LuaPlugin::registerGlobal(lua_State* L)
 	getGlobalNamespace(L).addFunction<string, const string&>("urlDecodeAnsi", UrlEncoding::deescapeURLAnsi);
 
 	
-
 	auto funcGetheaderTable = std::function <luabridge::LuaRef(HttpHeader*, lua_State*)>(
 		[](HttpHeader* header, lua_State* luastate) { return header->getPairsTable(luastate); }
 	);

@@ -1,6 +1,9 @@
 author = "Robin"
 version = 1.0
 
+local a = 1
+b =  2
+
 setting = {
     name = "测试string",
     dir = "d:\\",
@@ -10,6 +13,8 @@ setting = {
 	input3 = "条数/页",
 }
 
+ a = '测试'
+ b = "测试"
 
 function lua_main(keyWord, pageIndex, pageSize)
 	--printMessage 仅能接收字符串
